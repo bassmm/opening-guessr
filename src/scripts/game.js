@@ -30,6 +30,10 @@ document.addEventListener("alpine:init", () => {
     highScore: 0,
     loading: false,
     invalidGuess: false,
+    coverUrl: null,
+    coverLoading: false,
+    coverCache: {},
+    suggestAbove: false,
 
     init() {
       this.highScore = parseInt(
@@ -83,6 +87,20 @@ document.addEventListener("alpine:init", () => {
           if (type === "audio") {
             container.style.setProperty("--plyr-audio-controls-background", rootStyle.getPropertyValue("--color-base-100").trim());
             container.style.setProperty("--plyr-audio-control-color", rootStyle.getPropertyValue("--color-base-content").trim());
+          }
+        }
+        if (type === "audio") {
+          const videoEl = this.$refs.videoPlayer;
+          const startVideoPreload = () => {
+            if (videoEl && videoEl.preload !== "auto") {
+              videoEl.preload = "auto";
+              videoEl.load();
+            }
+          };
+          if (el.readyState >= 3) {
+            startVideoPreload();
+          } else {
+            player.on("canplay", startVideoPreload);
           }
         }
         if (type === "video") {
@@ -178,6 +196,7 @@ document.addEventListener("alpine:init", () => {
           this.current = this.rounds[0];
           this.screen = "playing";
           this.loading = false;
+          this.coverUrl = null;
           this.$nextTick(() => this.initPlyr("audio"));
         })
         .catch(() => {
@@ -198,6 +217,11 @@ document.addEventListener("alpine:init", () => {
       if (!this.guess.trim()) {
         this.searchResults = [];
         return;
+      }
+      const input = this.$refs.searchInput;
+      if (input) {
+        const rect = input.getBoundingClientRect();
+        this.suggestAbove = window.innerHeight - rect.bottom < 200;
       }
       const q = this.guess.toLowerCase();
       const seen = new Set();
@@ -255,6 +279,28 @@ document.addEventListener("alpine:init", () => {
         title: this.current.name,
       });
       this.searchResults = [];
+      const malId = this.current.mal_id;
+      if (this.coverCache[malId]) {
+        this.coverUrl = this.coverCache[malId];
+      } else {
+        this.coverLoading = true;
+        const q = `query ($idMal: Int) { Media(idMal: $idMal, type: ANIME) { coverImage { large } } }`;
+        fetch("https://graphql.anilist.co", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ query: q, variables: { idMal: malId } }),
+        })
+          .then((r) => r.json())
+          .then((d) => {
+            const url = d?.data?.Media?.coverImage?.large;
+            if (url) {
+              this.coverCache[malId] = url;
+              this.coverUrl = url;
+            }
+            this.coverLoading = false;
+          })
+          .catch(() => { this.coverLoading = false; });
+      }
     },
 
     nextRound() {
@@ -281,10 +327,11 @@ document.addEventListener("alpine:init", () => {
         window.__plyr.destroy();
         window.__plyr = null;
       }
-      this.$nextTick(() => this.initPlyr("audio"));
-    },
+        this.coverUrl = null;
+        this.$nextTick(() => this.initPlyr("audio"));
+      },
 
-    backToMenu() {
+      backToMenu() {
       if (window.__plyr) {
         window.__plyr.destroy();
         window.__plyr = null;

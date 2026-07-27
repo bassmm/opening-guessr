@@ -6,30 +6,40 @@
         >
             <span x-text="isCorrect ? 'Correct!' : 'Wrong!'"></span>
         </div>
-        <p class="text-xl">
-            The answer is: <strong x-text="correctTitle"></strong>
-        </p>
-        <p
-            class="text-base opacity-70"
-            x-text="(isCorrect ? (videoUnlocked ? '+500' : '+1000') : '+0') + ' points'"
-        >
-        </p>
-        <div class="w-full mt-3">
-            <div class="flex gap-2 justify-center">
-                <template x-for="(r, i) in results" :key="i">
-                    <div
-                        class="text-xl"
-                        :class="r.correct ? 'text-success' : 'text-error'"
-                        x-text="r.correct ? '●' : '○'"
-                    >
-                    </div>
-                </template>
-                <template
-                    x-for="i in (totalRounds - results.length)"
-                    :key="'empty-' + i"
+        <div class="flex gap-6 items-start w-full max-w-lg">
+            <div x-show="coverLoading" class="skeleton w-28 shrink-0 rounded-box" style="aspect-ratio: 3/4"></div>
+            <img
+                x-show="coverUrl"
+                :src="coverUrl"
+                :alt="correctTitle"
+                class="w-28 shrink-0 rounded-box shadow-md"
+            />
+            <div class="flex flex-col gap-2 min-w-0 text-left">
+                <div>
+                    <p class="text-sm uppercase opacity-80">The answer is:</p>
+                    <p class="text-xl font-bold" x-text="correctTitle"></p>
+                </div>
+                <p
+                    class="text-base opacity-70"
+                    x-text="(isCorrect ? (videoUnlocked ? '+500' : '+1000') : '+0') + ' points'"
                 >
-                    <div class="text-xl text-base-300">○</div>
-                </template>
+                </p>
+                <div class="flex gap-2 mt-1">
+                    <template x-for="(r, i) in results" :key="i">
+                        <div
+                            class="text-xl"
+                            :class="r.correct ? 'text-success' : 'text-error'"
+                            x-text="r.correct ? '●' : '○'"
+                        >
+                        </div>
+                    </template>
+                    <template
+                        x-for="i in (totalRounds - results.length)"
+                        :key="'empty-' + i"
+                    >
+                        <div class="text-xl text-base-300">○</div>
+                    </template>
+                </div>
             </div>
         </div>
         <button class="btn btn-primary btn-block btn-lg" @click="nextRound()">

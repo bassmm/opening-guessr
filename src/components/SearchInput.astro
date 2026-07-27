@@ -14,7 +14,8 @@
                 x-ref="searchInput"
             />
             <ul
-                class="absolute z-10 w-full bg-base-100 shadow-lg rounded-box mt-1 max-h-60 overflow-auto"
+                class="absolute z-10 w-full bg-base-100 shadow-lg rounded-box max-h-60 overflow-auto"
+                :class="suggestAbove ? 'bottom-full mb-1' : 'top-full mt-1'"
                 x-show="searchResults.length > 0"
             >
                 <template x-for="result in searchResults" :key="result">

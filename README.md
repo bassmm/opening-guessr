@@ -1,43 +1,83 @@
-# Astro Starter Kit: Minimal
+# Opening Guessr
 
-```sh
-pnpm create astro@latest -- --template minimal
+An anime opening guessing game — listen to a theme song, name the anime.
+
+Built with [Astro](https://astro.build), [AlpineJS](https://alpinejs.dev), [daisyUI](https://daisyui.com), and [Plyr](https://plyr.io).
+
+## How it works
+
+1. Choose a difficulty (Top 50 / 100 / 500 / 1000 / 2500 by popularity)
+2. Listen to the opening theme in audio mode (worth 1000 pts)
+3. Type the anime name — search-as-you-type filters the pool
+4. Optionally unlock the **blurred video** (halves the round to 500 pts permanently)
+5. After 5 rounds, see your score and accuracy
+
+## Tech stack
+
+| Layer | Choice |
+|---|---|
+| Framework | [Astro](https://astro.build) 7 |
+| UI logic | [AlpineJS](https://alpinejs.dev) 3 |
+| Styles | [Tailwind CSS](https://tailwindcss.com) 4 + [daisyUI](https://daisyui.com) 5 |
+| Media | [Plyr](https://plyr.io) with `--plyr-color-main` bound to daisyUI's `--color-primary` |
+| Data | Tenrai API (popularity-ranked anime list) → AnimeThemes API (opening audio/video links) |
+
+## Project structure
+
+```
+src/
+├── components/          # Astro UI components
+│   ├── AnswerCard.astro
+│   ├── GameNavbar.astro
+│   ├── MediaPlayer.astro
+│   ├── MenuScreen.astro
+│   ├── ModeToggle.astro
+│   ├── ResultScreen.astro
+│   └── SearchInput.astro
+├── data/
+│   └── fetch-openings.mjs   # Build script: Tenrai → AnimeThemes pipeline
+├── layouts/
+│   └── Layout.astro         # Base layout + theme selector
+├── pages/
+│   └── index.astro          # Entry point, components + Alpine data definition
+├── scripts/
+│   └── game.js              # Alpine game component (Plyr, state, game logic)
+└── styles/
+    └── global.css           # Tailwind + daisyUI + Pixelify Sans font
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Development
 
-## 🚀 Project Structure
+```bash
+# Install dependencies
+pnpm install
 
-Inside of your Astro project, you'll see the following folders and files:
+# Start dev server (background mode recommended)
+astro dev --background
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+# Check logs if needed
+astro dev logs
+astro dev status
+astro dev stop
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+The dev server runs at `http://localhost:4321`.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Build
 
-Any static assets, like images, can be placed in the `public/` directory.
+```bash
+pnpm build       # Prebuild fetches opening data, then Astro builds to dist/
+pnpm preview     # Preview the production build locally
+```
 
-## 🧞 Commands
+The `prebuild` step (`node src/data/fetch-openings.mjs`) paginates through the Tenrai API (2500 most popular anime), derives AnimeThemes slugs from titles, fetches opening audio/video links, and writes `public/data/openings.json`. Entries without a matching AnimeThemes opening are silently skipped (~1020 of 2500).
 
-All commands are run from the root of the project, from a terminal:
+## Game mechanics
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- **5 rounds** per game
+- **Audio mode**: full 1000 pts per correct guess
+- **Video unlock**: one-way, halves the round to 500 pts permanently
+- **Video range**: locked to 25s–65s via native `currentTime` setter override; pressing play after 65s restarts at 25s
+- **Answer validation**: search across all alternative titles (`titles` array), invalid guesses blocked with red input highlight
+- **High score**: persisted in `localStorage`
+- **32 daisyUI themes**: toggle via the paintbrush icon in the top-right corner
