@@ -1,0 +1,29 @@
+<div class="join" x-show="!answered">
+    <button
+        class="join-item btn btn-lg"
+        :class="{ 'btn-active': mode === 'audio' }"
+        @click="mode = 'audio'"
+        :disabled="!current?.audio"
+    >
+        Audio only <span
+            class="text-sm opacity-60"
+            x-text="videoUnlocked ? '500' : '1000'"></span><span
+            class="text-xs opacity-70">pts</span
+        >
+    </button>
+    <button
+        class="join-item btn btn-lg"
+        :class="{ 'btn-active': mode === 'video' }"
+        @click="switchToVideo()"
+        :disabled="!current?.video"
+    >
+        <span
+            x-text="videoUnlocked ? '🔓 Video Clue Unlocked' : '🔒 Unlock Video Clue'"
+        ></span>
+        <span
+            class="text-sm opacity-60"
+            x-text="videoUnlocked ? '500' : '-500'"
+        >
+        </span><span class="text-xs opacity-70">pts</span>
+    </button>
+</div>

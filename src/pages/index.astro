@@ -1,17 +1,45 @@
 ---
-
+import Layout from "../layouts/Layout.astro";
+import MenuScreen from "../components/MenuScreen.astro";
+import GameNavbar from "../components/GameNavbar.astro";
+import ModeToggle from "../components/ModeToggle.astro";
+import MediaPlayer from "../components/MediaPlayer.astro";
+import SearchInput from "../components/SearchInput.astro";
+import AnswerCard from "../components/AnswerCard.astro";
+import ResultScreen from "../components/ResultScreen.astro";
+import "plyr/dist/plyr.css";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+    <div x-data="game()" class="min-h-screen flex flex-col">
+        <template x-if="screen === 'menu'">
+            <MenuScreen />
+        </template>
+
+        <template x-if="screen === 'playing'">
+            <div class="min-h-screen bg-base-200 flex flex-col">
+                <GameNavbar />
+
+                <div
+                    class="flex-1 flex flex-col items-center p-8 gap-8 max-w-3xl mx-auto w-full"
+                >
+                    <MediaPlayer />
+                    <ModeToggle />
+                    <div x-show="!answered">
+                        <SearchInput />
+                    </div>
+
+                    <AnswerCard />
+                </div>
+            </div>
+        </template>
+
+        <template x-if="screen === 'result'">
+            <ResultScreen />
+        </template>
+    </div>
+</Layout>
+
+<script>
+    import "../scripts/game.js";
+</script>

@@ -1,0 +1,32 @@
+<div class="divider text-sm opacity-50" x-show="!answered">
+    <span
+        x-text="mode === 'audio' ? 'Listen to the opening (' + (videoUnlocked ? '500' : '1000') + ' pts)' : 'Watch the blurred opening (500 pts)'"
+    ></span>
+</div>
+
+<div class="w-full">
+    <audio
+        x-show="mode === 'audio'"
+        :src="current?.audio"
+        x-ref="audioPlayer"
+        controls
+        class="w-full"
+        x-init="initPlyr('audio')"></audio>
+    <div x-show="mode === 'video'" class="relative">
+        <video
+            :src="current?.video"
+            x-ref="videoPlayer"
+            preload="auto"
+            controls
+            class="w-full"
+            style="filter: blur(9px);"
+            x-init="initPlyr('video')"
+            @loadedmetadata="$el.currentTime = 25"
+            @seeking="if ($el.currentTime < 25) $el.currentTime = 25"
+            @timeupdate="if ($el.currentTime >= 65) $el.pause()"
+            @play="if ($el.currentTime >= 63) $el.currentTime = 25"></video>
+    </div>
+    <p class="text-base opacity-50 text-center mt-2" x-show="mode === 'video'">
+        Video starts at 25s and stops at 65s
+    </p>
+</div>

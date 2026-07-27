@@ -1,0 +1,32 @@
+<div class="hero min-h-screen bg-base-200">
+  <div class="hero-content text-center">
+    <div class="max-w-2xl">
+      <div class="mb-12">
+        <h1 class="text-7xl font-bold">Opening Guessr</h1>
+        <p class="py-6 text-2xl">Guess the anime from its opening theme!</p>
+      </div>
+      <div class="flex flex-col gap-6">
+        <select class="select select-bordered select-lg w-full text-lg" x-model="difficulty">
+          <option value="50">Top 50</option>
+          <option value="100">Top 100</option>
+          <option value="500">Top 500</option>
+          <option value="1000">Top 1000</option>
+          <option value="2500">Top 2500</option>
+        </select>
+        <button class="btn btn-primary btn-block btn-lg text-lg" @click="startGame()" :disabled="loading">
+          <span x-show="!loading">Start Game</span>
+          <span x-show="loading" class="loading loading-spinner"></span>
+        </button>
+      </div>
+      <div class="mt-12 text-lg opacity-60">
+        <p>5 rounds &middot; Audio mode: 1000 pts &middot; Video mode: 500 pts</p>
+        <div class="flex gap-4 justify-center mt-4">
+          <kbd class="kbd kbd-lg">Enter</kbd>
+          <span class="text-sm">Submit answer</span>
+          <kbd class="kbd kbd-lg">Esc</kbd>
+          <span class="text-sm">Close suggestions</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

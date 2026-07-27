@@ -1,0 +1,41 @@
+<div class="w-full">
+    <div class="flex gap-2">
+        <div class="relative flex-1">
+            <input
+                type="text"
+                class="input input-bordered w-full"
+                :class="{ 'input-error': invalidGuess }"
+                placeholder="Type anime name..."
+                x-model="guess"
+                @input="filterSearch(); invalidGuess = false"
+                @keydown.enter.prevent="submitAnswer()"
+                @keydown.escape="searchResults = []"
+                @click.outside="searchResults = []"
+                x-ref="searchInput"
+            />
+            <ul
+                class="absolute z-10 w-full bg-base-100 shadow-lg rounded-box mt-1 max-h-60 overflow-auto"
+                x-show="searchResults.length > 0"
+            >
+                <template x-for="result in searchResults" :key="result">
+                    <li
+                        class="px-4 py-2 hover:bg-base-200 cursor-pointer"
+                        @click="selectGuess(result)"
+                        x-text="result"
+                    >
+                    </li>
+                </template>
+            </ul>
+        </div>
+        <button
+            class="btn btn-primary px-6"
+            @click="submitAnswer()"
+            :disabled="!guess.trim() || invalidGuess"
+        >
+            Guess
+        </button>
+    </div>
+    <p class="text-sm text-error mt-1" x-show="invalidGuess">
+        Type or select a valid anime name from the suggestions
+    </p>
+</div>

@@ -1,0 +1,40 @@
+<div x-show="answered" class="card bg-base-100 shadow-xl w-full">
+    <div class="card-body items-center text-center gap-4">
+        <div
+            class="text-4xl font-bold"
+            :class="isCorrect ? 'text-success' : 'text-error'"
+        >
+            <span x-text="isCorrect ? 'Correct!' : 'Wrong!'"></span>
+        </div>
+        <p class="text-xl">
+            The answer is: <strong x-text="correctTitle"></strong>
+        </p>
+        <p
+            class="text-base opacity-70"
+            x-text="(isCorrect ? (videoUnlocked ? '+500' : '+1000') : '+0') + ' points'"
+        >
+        </p>
+        <div class="w-full mt-3">
+            <div class="flex gap-2 justify-center">
+                <template x-for="(r, i) in results" :key="i">
+                    <div
+                        class="text-xl"
+                        :class="r.correct ? 'text-success' : 'text-error'"
+                        x-text="r.correct ? '●' : '○'"
+                    >
+                    </div>
+                </template>
+                <template
+                    x-for="i in (totalRounds - results.length)"
+                    :key="'empty-' + i"
+                >
+                    <div class="text-xl text-base-300">○</div>
+                </template>
+            </div>
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" @click="nextRound()">
+            <span x-text="round >= totalRounds ? 'See Results' : 'Next Round'"
+            ></span>
+        </button>
+    </div>
+</div>

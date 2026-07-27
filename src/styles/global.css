@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: all;
+}
+@theme {
+  --font-family-pixelify: "Pixelify Sans", sans-serif;
+}
+
+html {
+  font-family: "Pixelify Sans", sans-serif;
+}
