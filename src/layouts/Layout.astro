@@ -2,64 +2,113 @@
 import "../styles/global.css";
 
 export interface Props {
-  title?: string;
+    title?: string;
 }
 
 const { title = "Opening Guessr" } = Astro.props;
 ---
 
 <html lang="en" data-theme="retro">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap"
-      rel="stylesheet"
-    />
-    <title>{title}</title>
-  </head>
-  <body class="min-h-screen bg-base-200 text-base-content">
-    <div class="fixed top-4 right-4 z-50" x-data="{ open: false }">
-      <button class="btn btn-sm btn-ghost btn-square" @click="open = !open" @click.outside="open = false">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42" />
-        </svg>
-      </button>
-      <div x-show="open" class="absolute right-0 mt-2 w-44 bg-base-100 shadow-xl rounded-box p-2 border border-base-300 max-h-80 overflow-y-auto">
-        <template x-for="theme in $store.theme.themes" :key="theme">
-          <button class="btn btn-sm btn-block justify-start text-left" :class="{ 'btn-primary': $store.theme.current === theme }" @click="$store.theme.set(theme); open = false" x-text="theme"></button>
-        </template>
-      </div>
-    </div>
-    <slot />
-  </body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="apple-touch-icon" sizes="300x300" href="/favicon.png" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap"
+            rel="stylesheet"
+        />
+        <title>{title}</title>
+    </head>
+    <body class="min-h-screen bg-base-200 text-base-content">
+        <div class="fixed top-4 right-4 z-50" x-data="{ open: false }">
+            <button
+                class="btn btn-sm btn-ghost btn-square"
+                @click="open = !open"
+                @click.outside="open = false"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    class="size-5"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42"
+                    ></path>
+                </svg>
+            </button>
+            <div
+                x-show="open"
+                class="absolute right-0 mt-2 w-44 bg-base-100 shadow-xl rounded-box p-2 border border-base-300 max-h-80 overflow-y-auto"
+            >
+                <template x-for="theme in $store.theme.themes" :key="theme">
+                    <button
+                        class="btn btn-sm btn-block justify-start text-left"
+                        :class="{ 'btn-primary': $store.theme.current === theme }"
+                        @click="$store.theme.set(theme); open = false"
+                        x-text="theme"></button>
+                </template>
+            </div>
+        </div>
+        <slot />
+    </body>
 </html>
 
 <script>
-  document.addEventListener("alpine:init", () => {
-    Alpine.store("theme", {
-      themes: [
-        "light", "dark", "cupcake", "bumblebee", "emerald", "corporate",
-        "synthwave", "retro", "cyberpunk", "valentine", "halloween",
-        "garden", "forest", "aqua", "lofi", "pastel", "fantasy",
-        "wireframe", "black", "luxury", "dracula", "cmyk", "autumn",
-        "business", "acid", "lemonade", "night", "coffee", "winter",
-        "dim", "nord", "sunset",
-      ],
-      current:
-        localStorage.getItem("openingGuessr_theme") || "retro",
-      set(theme) {
-        this.current = theme;
-        localStorage.setItem("openingGuessr_theme", theme);
-      },
-    });
+    document.addEventListener("alpine:init", () => {
+        Alpine.store("theme", {
+            themes: [
+                "light",
+                "dark",
+                "cupcake",
+                "bumblebee",
+                "emerald",
+                "corporate",
+                "synthwave",
+                "retro",
+                "cyberpunk",
+                "valentine",
+                "halloween",
+                "garden",
+                "forest",
+                "aqua",
+                "lofi",
+                "pastel",
+                "fantasy",
+                "wireframe",
+                "black",
+                "luxury",
+                "dracula",
+                "cmyk",
+                "autumn",
+                "business",
+                "acid",
+                "lemonade",
+                "night",
+                "coffee",
+                "winter",
+                "dim",
+                "nord",
+                "sunset",
+            ],
+            current: localStorage.getItem("openingGuessr_theme") || "retro",
+            set(theme) {
+                this.current = theme;
+                localStorage.setItem("openingGuessr_theme", theme);
+            },
+        });
 
-    Alpine.effect(() => {
-      const theme = Alpine.store("theme").current;
-      document.documentElement.setAttribute("data-theme", theme);
+        Alpine.effect(() => {
+            const theme = Alpine.store("theme").current;
+            document.documentElement.setAttribute("data-theme", theme);
+        });
     });
-  });
 </script>

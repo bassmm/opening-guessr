@@ -12,6 +12,8 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("game", () => ({
     screen: "menu",
     difficulty: "50",
+    selectedGenre: "",
+    genres: [],
     round: 1,
     totalRounds: 5,
     score: 0,
@@ -39,6 +41,22 @@ document.addEventListener("alpine:init", () => {
       this.highScore = parseInt(
         localStorage.getItem("openingGuessr_highScore") || "0"
       );
+      fetch("/data/openings.json")
+        .then((r) => r.json())
+        .then((data) => {
+          this.dataset = data;
+          const counts = {};
+          data.forEach((a) =>
+            (a.genres || []).forEach((g) => {
+              counts[g] = (counts[g] || 0) + 1;
+            })
+          );
+          this.genres = Object.entries(counts)
+            .filter(([g, c]) => c > 50)
+            .sort((a, b) => b[1] - a[1])
+            .map(([name, count]) => ({ name, count }));
+        })
+        .catch(() => {});
       this.$watch("mode", (val, old) => {
         if (val === old) return;
         this.$nextTick(() => this.initPlyr(val === "audio" ? "audio" : "video"));
@@ -164,45 +182,62 @@ document.addEventListener("alpine:init", () => {
         window.__plyr = null;
       }
       this.loading = true;
-      fetch("/data/openings.json")
-        .then((r) => {
-          if (!r.ok) throw new Error("Failed to load data");
-          return r.json();
-        })
-        .then((data) => {
-          this.dataset = data;
+
+      const run = (data) => {
+        this.dataset = data;
+
+        if (this.difficulty === "genre") {
+          this.pool = data.filter(
+            (d) =>
+              this.selectedGenre &&
+              (d.genres || []).includes(this.selectedGenre)
+          );
+        } else {
           const limit = parseInt(this.difficulty);
           this.pool = data.filter(
             (d) => d.rank !== null && d.rank <= limit
           );
-          if (this.pool.length < this.totalRounds) {
-            alert("Not enough anime in this difficulty. Try a larger pool.");
-            this.loading = false;
-            return;
-          }
-          this.rounds = this.shuffle([...this.pool]).slice(
-            0,
-            this.totalRounds
-          );
-          this.round = 1;
-          this.score = 0;
-          this.results = [];
-          this.answered = false;
-          this.guess = "";
-          this.searchResults = [];
-          this.invalidGuess = false;
-          this.mode = "audio";
-          this.videoUnlocked = false;
+        }
+
+        if (this.pool.length < this.totalRounds) {
+          alert("Not enough anime in this difficulty. Try a larger pool.");
+          this.loading = false;
+          return;
+        }
+        this.rounds = this.shuffle([...this.pool]).slice(
+          0,
+          this.totalRounds
+        );
+        this.round = 1;
+        this.score = 0;
+        this.results = [];
+        this.answered = false;
+        this.guess = "";
+        this.searchResults = [];
+        this.invalidGuess = false;
+        this.mode = "audio";
+        this.videoUnlocked = false;
           this.current = this.rounds[0];
           this.screen = "playing";
           this.loading = false;
           this.coverUrl = null;
           this.$nextTick(() => this.initPlyr("audio"));
-        })
-        .catch(() => {
-          alert("Failed to load game data. Please try again.");
-          this.loading = false;
-        });
+      };
+
+      if (this.dataset.length) {
+        run(this.dataset);
+      } else {
+        fetch("/data/openings.json")
+          .then((r) => {
+            if (!r.ok) throw new Error("Failed to load data");
+            return r.json();
+          })
+          .then((data) => run(data))
+          .catch(() => {
+            alert("Failed to load game data. Please try again.");
+            this.loading = false;
+          });
+      }
     },
 
     shuffle(arr) {
@@ -235,12 +270,15 @@ document.addEventListener("alpine:init", () => {
           seen.add(a.name);
           return true;
         })
-        .map((a) => a.name)
+        .map((a) => ({
+          name: a.titles?.[0] || a.name,
+          english: a.titles?.[1] || null,
+        }))
         .slice(0, 4);
     },
 
-    selectGuess(name) {
-      this.guess = name;
+    selectGuess(result) {
+      this.guess = result.name;
       this.searchResults = [];
       this.invalidGuess = false;
       this.submitAnswer();
@@ -336,6 +374,7 @@ document.addEventListener("alpine:init", () => {
         window.__plyr.destroy();
         window.__plyr = null;
       }
+      this.selectedGenre = "";
       this.screen = "menu";
     },
   }));

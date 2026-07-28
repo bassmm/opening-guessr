@@ -1,6 +1,6 @@
 <div class="w-full">
     <div class="flex gap-2">
-        <div class="relative flex-1">
+        <div class="relative flex-[3]">
             <input
                 type="text"
                 class="input input-bordered w-full"
@@ -18,12 +18,13 @@
                 :class="suggestAbove ? 'bottom-full mb-1' : 'top-full mt-1'"
                 x-show="searchResults.length > 0"
             >
-                <template x-for="result in searchResults" :key="result">
+                <template x-for="result in searchResults" :key="result.name">
                     <li
                         class="px-4 py-2 hover:bg-base-200 cursor-pointer"
                         @click="selectGuess(result)"
-                        x-text="result"
                     >
+                        <span x-text="result.name"></span>
+                        <span x-show="result.english" class="ml-2 opacity-60" x-text="result.english"></span>
                     </li>
                 </template>
             </ul>
