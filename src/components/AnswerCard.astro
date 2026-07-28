@@ -1,23 +1,23 @@
 <div x-show="answered" class="card bg-base-100 shadow-xl w-full">
-    <div class="card-body items-center text-center gap-4">
+    <div class="card-body items-center text-center gap-4 px-4 sm:px-6">
         <div
-            class="text-4xl font-bold"
+            class="text-3xl sm:text-4xl font-bold"
             :class="isCorrect ? 'text-success' : 'text-error'"
         >
             <span x-text="isCorrect ? 'Correct!' : 'Wrong!'"></span>
         </div>
-        <div class="flex gap-6 items-start w-full max-w-lg">
-            <div x-show="coverLoading" class="skeleton w-28 shrink-0 rounded-box" style="aspect-ratio: 3/4"></div>
+        <div class="flex gap-4 sm:gap-6 items-start w-full max-w-lg">
+            <div x-show="coverLoading" class="skeleton w-20 sm:w-28 shrink-0 rounded-box" style="aspect-ratio: 3/4"></div>
             <img
                 x-show="coverUrl"
                 :src="coverUrl"
                 :alt="correctTitle"
-                class="w-28 shrink-0 rounded-box shadow-md"
+                class="w-20 sm:w-28 shrink-0 rounded-box shadow-md"
             />
             <div class="flex flex-col gap-2 min-w-0 text-left">
                 <div>
                     <p class="text-sm uppercase opacity-80">The answer is:</p>
-                    <p class="text-xl font-bold" x-text="correctTitle"></p>
+                    <p class="text-lg sm:text-xl font-bold" x-text="correctTitle"></p>
                 </div>
                 <p
                     class="text-base opacity-70"
