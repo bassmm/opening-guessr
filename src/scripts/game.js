@@ -251,7 +251,7 @@ document.addEventListener("alpine:init", () => {
         })
         .map((a) => ({
           name: a.titles?.[0] || a.name,
-          english: a.titles?.[1] || null,
+          english: a.name_english || null,
         }))
         .slice(0, 5);
     },

@@ -194,9 +194,12 @@ async function main() {
           }
         }
 
+        const nameEnglish = anime.title_english || gqlEnglish || null;
+
         allResults.push({
           mal_id: anime.mal_id,
           name: entry.name,
+          name_english: nameEnglish,
           titles: resultTitles,
           rank: anime.popularity || null,
           score: anime.score,
