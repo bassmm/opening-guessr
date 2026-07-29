@@ -18,6 +18,12 @@ const GQL_QUERY = `query ($id: [Int!]) {
     animethemes {
       type
       sequence
+      song {
+        title { romaji }
+        performances {
+          artist { name { main } }
+        }
+      }
       animethemeentries(first: 1) {
         videos { nodes { link audio { link } } }
       }
@@ -84,6 +90,8 @@ function pickOpEntry(animeData) {
     slug: animeData.slug,
     video: video.link,
     audio: video.audio?.link || null,
+    songTitle: op.song?.title?.romaji || null,
+    songArtist: op.song?.performances?.[0]?.artist?.name?.main || null,
   };
 }
 
@@ -197,6 +205,10 @@ async function main() {
           slug: entry.slug,
           video: entry.video,
           audio: entry.audio,
+          song: {
+            title: entry.songTitle,
+            artist: entry.songArtist,
+          },
         });
 
         pageCollected++;

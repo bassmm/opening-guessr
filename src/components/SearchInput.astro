@@ -32,7 +32,7 @@
         <button
             class="btn btn-primary px-6"
             @click="submitAnswer()"
-            :disabled="!guess.trim() || invalidGuess"
+            :disabled="invalidGuess"
         >
             Guess
         </button>

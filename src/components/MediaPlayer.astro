@@ -18,8 +18,10 @@
             x-ref="videoPlayer"
             preload="metadata"
             controls
+            playsinline
+            disablepictureinpicture
             class="w-full"
-            style="filter: blur(9px);"
+            :class="{ 'blur-[9px]': !answered }"
             x-init="initPlyr('video')"
             @loadedmetadata="$el.currentTime = 25"
             @seeking="if ($el.currentTime < 25) $el.currentTime = 25"

@@ -7,17 +7,39 @@
             <span x-text="isCorrect ? 'Correct!' : 'Wrong!'"></span>
         </div>
         <div class="flex gap-4 sm:gap-6 items-start w-full max-w-lg">
-            <div x-show="coverLoading" class="skeleton w-20 sm:w-28 shrink-0 rounded-box" style="aspect-ratio: 3/4"></div>
+            <div
+                x-show="coverLoading"
+                class="skeleton w-24 sm:w-36 shrink-0 rounded-box"
+                style="aspect-ratio: 3/4"
+            >
+            </div>
             <img
                 x-show="coverUrl"
                 :src="coverUrl"
                 :alt="correctTitle"
-                class="w-20 sm:w-28 shrink-0 rounded-box shadow-md"
+                class="w-24 sm:w-36 shrink-0 rounded-box shadow-md"
             />
             <div class="flex flex-col gap-2 min-w-0 text-left">
                 <div>
                     <p class="text-sm uppercase opacity-80">The answer is:</p>
-                    <p class="text-lg sm:text-xl font-bold" x-text="correctTitle"></p>
+                    <div class="flex flex-col items-baseline gap-x-2">
+                        <span
+                            class="text-lg sm:text-2xl font-bold"
+                            x-text="correctTitle"></span>
+                        <span
+                            x-show="current?.titles?.[1]"
+                            class="text-md sm:text-xl opacity-60"
+                            x-text="current.titles[1]"></span>
+                    </div>
+                    <p
+                        x-show="current?.song?.title"
+                        class="text-xs sm:text-sm opacity-50 mt-2 mb-3"
+                    >
+                        <span x-text="'♪ ' + current.song.title"></span>
+                        <span
+                            x-show="current?.song?.artist"
+                            x-text="' — ' + current.song.artist + ' ♪'"></span>
+                    </p>
                 </div>
                 <p
                     class="text-base opacity-70"

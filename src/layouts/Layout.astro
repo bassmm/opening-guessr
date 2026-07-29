@@ -6,6 +6,8 @@ export interface Props {
 }
 
 const { title = "Opening Guessr" } = Astro.props;
+
+const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
 ---
 
 <html lang="en" data-theme="retro">
@@ -13,14 +15,16 @@ const { title = "Opening Guessr" } = Astro.props;
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <meta property="og:title" content={title} />
+        <meta
+            property="og:description"
+            content="Guess the anime from its opening theme!"
+        />
+        <meta property="og:image" content={defaultImageWithDomain} />
+        <meta property="og:url" content={Astro.site} />
+        <meta property="og:type" content="website" />
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="apple-touch-icon" sizes="300x300" href="/favicon.png" />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap"
-            rel="stylesheet"
-        />
         <title>{title}</title>
     </head>
     <body class="min-h-screen bg-base-200 text-base-content">
@@ -99,7 +103,7 @@ const { title = "Opening Guessr" } = Astro.props;
                 "nord",
                 "sunset",
             ],
-            current: localStorage.getItem("openingGuessr_theme") || "retro",
+            current: localStorage.getItem("openingGuessr_theme") || "dracula",
             set(theme) {
                 this.current = theme;
                 localStorage.setItem("openingGuessr_theme", theme);

@@ -1,13 +1,5 @@
 import Plyr from "plyr";
 
-if (!document.getElementById("plyr-marker-styles")) {
-  const s = document.createElement("style");
-  s.id = "plyr-marker-styles";
-  s.textContent =
-    ".plyr--video .plyr__progress::before,.plyr--video .plyr__progress::after{content:'';position:absolute;top:2px;width:2px;height:calc(100% - 4px);z-index:11;pointer-events:none;border-radius:1px;background:rgba(255,255,255,0.7)}.plyr--video .plyr__progress::before{left:var(--min-percent)}.plyr--video .plyr__progress::after{left:var(--max-percent)}";
-  document.head.appendChild(s);
-}
-
 document.addEventListener("alpine:init", () => {
   Alpine.data("game", () => ({
     screen: "menu",
@@ -94,19 +86,6 @@ document.addEventListener("alpine:init", () => {
             "fullscreen",
           ],
         });
-        const container = player.elements.container;
-        if (container) {
-          const rootStyle = getComputedStyle(elRoot);
-          const primary = rootStyle.getPropertyValue("--color-primary").trim();
-          const radius = rootStyle.getPropertyValue("--radius-box").trim();
-          container.style.setProperty("--plyr-color-main", primary);
-          container.style.setProperty("--plyr-border-radius", radius);
-          container.style.setProperty("--plyr-video-controls-background", "oklch(0 0 0 / 0.6)");
-          if (type === "audio") {
-            container.style.setProperty("--plyr-audio-controls-background", rootStyle.getPropertyValue("--color-base-100").trim());
-            container.style.setProperty("--plyr-audio-control-color", rootStyle.getPropertyValue("--color-base-content").trim());
-          }
-        }
         if (type === "audio") {
           const videoEl = this.$refs.videoPlayer;
           const startVideoPreload = () => {
@@ -274,7 +253,7 @@ document.addEventListener("alpine:init", () => {
           name: a.titles?.[0] || a.name,
           english: a.titles?.[1] || null,
         }))
-        .slice(0, 4);
+        .slice(0, 5);
     },
 
     selectGuess(result) {
@@ -294,15 +273,20 @@ document.addEventListener("alpine:init", () => {
     },
 
     submitAnswer() {
-      if (!this.guess.trim() || this.answered) return;
-      if (!this.isValidGuess(this.guess)) {
-        this.invalidGuess = true;
-        return;
+      if (this.answered) return;
+      if (!this.guess.trim()) {
+        this.isCorrect = false;
+        this.invalidGuess = false;
+      } else {
+        if (!this.isValidGuess(this.guess)) {
+          this.invalidGuess = true;
+          return;
+        }
+        this.invalidGuess = false;
+        const q = this.guess.trim().toLowerCase();
+        const titles = this.current.titles || [this.current.name];
+        this.isCorrect = titles.some((t) => t.toLowerCase() === q);
       }
-      this.invalidGuess = false;
-      const q = this.guess.trim().toLowerCase();
-      const titles = this.current.titles || [this.current.name];
-      this.isCorrect = titles.some((t) => t.toLowerCase() === q);
       this.answered = true;
       this.correctTitle = this.current.name;
       const points = this.isCorrect
