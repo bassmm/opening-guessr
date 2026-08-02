@@ -15,6 +15,7 @@
   "dependencies": {
     "@astrojs/alpinejs": "^1.0.0",
     "@astrojs/sitemap": "^3.7.3",
+    "@phosphor-icons/web": "^2.1.2",
     "@tailwindcss/vite": "^4.3.3",
     "@types/alpinejs": "^3.13.11",
     "alpinejs": "^3.15.12",
