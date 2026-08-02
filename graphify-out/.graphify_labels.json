@@ -1,0 +1,13 @@
+{
+  "0": "dependencies",
+  "1": "package.json",
+  "2": "game.js",
+  "3": "index.astro",
+  "4": "fetch-openings.mjs",
+  "5": "Guidelines",
+  "6": "Guidelines",
+  "7": "Opening Guessr <a href=\"https://opguessr.netlify.app\"><img src=\"public/favicon.png\" width=\"48\" align=\"right\"/></a>",
+  "8": "tsconfig.json",
+  "9": "robots.txt.ts",
+  "10": "astro.config.mjs"
+}

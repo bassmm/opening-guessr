@@ -1,0 +1,132 @@
+{
+  ".vscode/extensions.json": {
+    "mtime": 1784569550.0,
+    "ast_hash": "3adedb22d082dbd1ebb00b75d21403aa",
+    "semantic_hash": ""
+  },
+  ".vscode/launch.json": {
+    "mtime": 1784569550.0,
+    "ast_hash": "60493763dcbc2d109e57da86d997602a",
+    "semantic_hash": ""
+  },
+  "anilist-test.json": {
+    "mtime": 1785179230.3981395,
+    "ast_hash": "721b2f832ee41ac733f53a242245a768",
+    "semantic_hash": ""
+  },
+  "astro.config.mjs": {
+    "mtime": 1785337673.3801112,
+    "ast_hash": "8ca9b9b9e87b65752fa6df02168bb41e",
+    "semantic_hash": ""
+  },
+  "opening-guessrschema.json": {
+    "mtime": 1785227113.6022668,
+    "ast_hash": "e1fb661f05f65b8ea134c09d0cdaadb2",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1785337670.1561902,
+    "ast_hash": "5323d2502fd36f72128b5f7084cb8640",
+    "semantic_hash": ""
+  },
+  "public/data/openings.json": {
+    "mtime": 1785344945.585963,
+    "ast_hash": "ca2a409b9bd8d1df83d1947d0bc81bcd",
+    "semantic_hash": ""
+  },
+  "src/components/AnswerCard.astro": {
+    "mtime": 1785344955.8976874,
+    "ast_hash": "4784c48cbcacee73a81ea8147d084a49",
+    "semantic_hash": ""
+  },
+  "src/components/GameNavbar.astro": {
+    "mtime": 1785327449.4826071,
+    "ast_hash": "b4a3dc74ab9e94c841ea5425dc53e915",
+    "semantic_hash": ""
+  },
+  "src/components/MediaPlayer.astro": {
+    "mtime": 1785333592.4619832,
+    "ast_hash": "96f88f847118ad5d185339e8472078d0",
+    "semantic_hash": ""
+  },
+  "src/components/MenuScreen.astro": {
+    "mtime": 1785240525.4004014,
+    "ast_hash": "88682b2d32e22d1e49f044f56957c36c",
+    "semantic_hash": ""
+  },
+  "src/components/ModeToggle.astro": {
+    "mtime": 1785327313.8484244,
+    "ast_hash": "ca8619fa0d67bebad7fff9c854d1481d",
+    "semantic_hash": ""
+  },
+  "src/components/ResultScreen.astro": {
+    "mtime": 1785327334.3911915,
+    "ast_hash": "5cbae7f075f965e95880f75994e76cc4",
+    "semantic_hash": ""
+  },
+  "src/components/SearchInput.astro": {
+    "mtime": 1785335172.6795845,
+    "ast_hash": "1535bfb0eb19385a4c04c736ac66e3a9",
+    "semantic_hash": ""
+  },
+  "src/data/fetch-openings.mjs": {
+    "mtime": 1785344795.4921436,
+    "ast_hash": "d32f40c57a6b3a21bb22a50aa9fb41c5",
+    "semantic_hash": ""
+  },
+  "src/layouts/Layout.astro": {
+    "mtime": 1785359658.4647696,
+    "ast_hash": "d61f33cd2029c3f7acf41cdb37bb74c6",
+    "semantic_hash": ""
+  },
+  "src/pages/index.astro": {
+    "mtime": 1785270304.857412,
+    "ast_hash": "310f7597f0d84c8850aaa1ed325b6f7f",
+    "semantic_hash": ""
+  },
+  "src/pages/robots.txt.ts": {
+    "mtime": 1785337808.6533918,
+    "ast_hash": "cf50b791d45b990fb0463db88701d30e",
+    "semantic_hash": ""
+  },
+  "src/scripts/game.js": {
+    "mtime": 1785344955.1775627,
+    "ast_hash": "6602ea1f90773b17cd6ff1a4fd15f8e6",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1784569550.0,
+    "ast_hash": "1d3613ac08bdda17e2b82251613dbc21",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1785704140.456878,
+    "ast_hash": "3b7f37b4b63b5aa79c03569c573496c3",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1785704140.456878,
+    "ast_hash": "3b7f37b4b63b5aa79c03569c573496c3",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1785338275.266543,
+    "ast_hash": "700e2ca8cc5d015add187c420cd6df14",
+    "semantic_hash": ""
+  },
+  "pnpm-workspace.yaml": {
+    "mtime": 1785158119.9993353,
+    "ast_hash": "49800c052efa3403d830505ccebdd114",
+    "semantic_hash": ""
+  },
+  "public/favicon.png": {
+    "mtime": 1785243109.795226,
+    "ast_hash": "ab59826e9c5b75535d26f8e2bc905bd3",
+    "semantic_hash": ""
+  },
+  "public/opengraph.png": {
+    "mtime": 1785321220.438996,
+    "ast_hash": "23e21c9ddb5e52a970a8a742a8328bbd",
+    "semantic_hash": ""
+  }
+}
