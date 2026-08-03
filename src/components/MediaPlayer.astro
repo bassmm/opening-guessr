@@ -23,8 +23,7 @@
             class="w-full"
             :class="{ 'blur-[9px]': !answered }"
             x-init="initPlyr('video')"
-            @loadedmetadata="$el.currentTime = 25"
-            @seeking="if ($el.currentTime < 25) $el.currentTime = 25"
+            @seeking="if ($el.currentTime < 25 || $el.currentTime > 65) $el.currentTime = Math.min(Math.max($el.currentTime, 25), 65)"
             @timeupdate="if ($el.currentTime >= 65) $el.pause()"
             @play="if ($el.currentTime >= 63) $el.currentTime = 25"></video>
     </div>
