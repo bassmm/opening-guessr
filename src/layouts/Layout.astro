@@ -39,6 +39,7 @@ const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
         <div class="fixed top-4 right-4 z-50" x-data="{ open: false }">
             <button
                 class="btn btn-sm btn-ghost btn-square"
+                aria-label="Theme selector"
                 @click="open = !open"
                 @click.outside="open = false"
             >
