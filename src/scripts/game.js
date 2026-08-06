@@ -4,7 +4,7 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("game", () => ({
     screen: "menu",
     difficulty: "50",
-    selectedGenre: "",
+    selectedGenres: [],
     genres: [],
     round: 1,
     totalRounds: 5,
@@ -61,6 +61,42 @@ document.addEventListener("alpine:init", () => {
       observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     },
 
+    get filteredPoolCount() {
+      if (!this.dataset || !this.dataset.length) return 0;
+      const limit = parseInt(this.difficulty);
+      return this.dataset.filter((d) => {
+        const matchesRank = d.rank !== null && d.rank <= limit;
+        if (!matchesRank) return false;
+        if (this.selectedGenres.length > 0) {
+          return this.selectedGenres.every((g) => (d.genres || []).includes(g));
+        }
+        return true;
+      }).length;
+    },
+
+    toggleGenre(genreName) {
+      if (this.selectedGenres.includes(genreName)) {
+        this.selectedGenres = this.selectedGenres.filter((g) => g !== genreName);
+      } else {
+        this.selectedGenres.push(genreName);
+      }
+    },
+
+    resetMedia() {
+      if (window.__plyr) {
+        window.__plyr.destroy();
+        window.__plyr = null;
+      }
+      [this.$refs.audioPlayer, this.$refs.videoPlayer].forEach((el) => {
+        if (!el) return;
+        el.pause();
+        el.removeAttribute("src");
+        el.removeAttribute("data-preload-armed");
+        el.preload = "none";
+        el.load();
+      });
+    },
+
     initPlyr(type) {
       if (type === "video" && this.mode !== "video") return;
       if (type === "audio" && this.mode !== "audio") return;
@@ -87,40 +123,9 @@ document.addEventListener("alpine:init", () => {
           ],
         });
         if (type === "audio") {
-          const videoEl = this.$refs.videoPlayer;
-          const startVideoPreload = () => {
-            if (videoEl && videoEl.preload !== "auto") {
-              videoEl.preload = "auto";
-              videoEl.load();
-            }
-          };
-          if (el.readyState >= 3) {
-            startVideoPreload();
-          } else {
-            player.on("canplay", startVideoPreload);
-          }
+          this.setVideoPreload();
         }
         if (type === "video") {
-          const mediaProto = HTMLMediaElement.prototype;
-          const ctDesc =
-            Object.getOwnPropertyDescriptor(mediaProto, "currentTime") ||
-            Object.getOwnPropertyDescriptor(
-              Object.getPrototypeOf(el),
-              "currentTime"
-            );
-          if (ctDesc && ctDesc.set) {
-            Object.defineProperty(el, "currentTime", {
-              get() {
-                return ctDesc.get.call(el);
-              },
-              set(value) {
-                ctDesc.set.call(
-                  el,
-                  Math.min(Math.max(value, 25), 65)
-                );
-              },
-            });
-          }
           player.on("ready", () => {
             const dur = player.duration || 1;
             const minPct = (25 / dur) * 100;
@@ -148,6 +153,23 @@ document.addEventListener("alpine:init", () => {
       });
     },
 
+    setVideoPreload() {
+      const videoEl = this.$refs.videoPlayer;
+      if (!videoEl || videoEl.dataset.preloadArmed) return;
+      videoEl.dataset.preloadArmed = "1";
+      videoEl.preload = "metadata";
+      const bufferFrom25 = () => {
+        if (videoEl.currentTime < 25) {
+          videoEl.currentTime = 25;
+        }
+      };
+      if (videoEl.readyState >= 1) {
+        bufferFrom25();
+      } else {
+        videoEl.addEventListener("loadedmetadata", bufferFrom25, { once: true });
+      }
+    },
+
     switchToVideo() {
       if (!this.videoUnlocked) {
         this.videoUnlocked = true;
@@ -156,27 +178,21 @@ document.addEventListener("alpine:init", () => {
     },
 
     startGame() {
-      if (window.__plyr) {
-        window.__plyr.destroy();
-        window.__plyr = null;
-      }
+      this.resetMedia();
       this.loading = true;
 
       const run = (data) => {
         this.dataset = data;
 
-        if (this.difficulty === "genre") {
-          this.pool = data.filter(
-            (d) =>
-              this.selectedGenre &&
-              (d.genres || []).includes(this.selectedGenre)
-          );
-        } else {
-          const limit = parseInt(this.difficulty);
-          this.pool = data.filter(
-            (d) => d.rank !== null && d.rank <= limit
-          );
-        }
+        const limit = parseInt(this.difficulty);
+        this.pool = data.filter((d) => {
+          const matchesRank = d.rank !== null && d.rank <= limit;
+          if (!matchesRank) return false;
+          if (this.selectedGenres.length > 0) {
+            return this.selectedGenres.every((g) => (d.genres || []).includes(g));
+          }
+          return true;
+        });
 
         if (this.pool.length < this.totalRounds) {
           alert("Not enough anime in this difficulty. Try a larger pool.");
@@ -200,7 +216,6 @@ document.addEventListener("alpine:init", () => {
           this.screen = "playing";
           this.loading = false;
           this.coverUrl = null;
-          this.$nextTick(() => this.initPlyr("audio"));
       };
 
       if (this.dataset.length) {
@@ -345,20 +360,14 @@ document.addEventListener("alpine:init", () => {
       this.invalidGuess = false;
       this.mode = "audio";
       this.videoUnlocked = false;
-      if (window.__plyr) {
-        window.__plyr.destroy();
-        window.__plyr = null;
-      }
+      this.resetMedia();
         this.coverUrl = null;
         this.$nextTick(() => this.initPlyr("audio"));
       },
 
       backToMenu() {
-      if (window.__plyr) {
-        window.__plyr.destroy();
-        window.__plyr = null;
-      }
-      this.selectedGenre = "";
+      this.resetMedia();
+      this.selectedGenres = [];
       this.screen = "menu";
     },
   }));

@@ -1,6 +1,6 @@
 <div class="hero min-h-screen bg-base-200">
     <div class="hero-content text-center">
-        <div class="max-w-2xl">
+        <div class="max-w-2xl w-full">
             <div class="mb-12">
                 <h1 class="text-7xl font-bold">Opening Guessr</h1>
                 <p class="py-6 text-2xl">
@@ -17,32 +17,62 @@
                     <option value="500">Top 500</option>
                     <option value="1000">Top 1000</option>
                     <option value="2500">Top 2500</option>
-                    <option value="genre">Genre</option>
                 </select>
-                <select
-                    class="select select-bordered select-lg w-full text-lg"
-                    x-model="selectedGenre"
-                    x-show="difficulty === 'genre'"
-                    x-transition
+
+                <!-- Optional Genre Filter Multi-Select Collapse -->
+                <details
+                    class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box text-left"
                 >
-                    <option value="">Select a genre...</option>
-                    <template x-for="g in genres" :key="g.name">
-                        <option :value="g.name"
-                            ><span x-text="g.name + ' '"></span><span
-                                class="text-sm opacity-60"
-                                x-text="'[' + g.count + ']'"></span></option
-                        >
-                    </template>
-                </select>
+                    <summary class="collapse-title text-lg font-medium">
+                        Filter by Genre (Optional)
+                        <template x-if="selectedGenres.length > 0">
+                            <span
+                                class="badge badge-primary ml-2"
+                                x-text="selectedGenres.length"></span>
+                        </template>
+                    </summary>
+                    <div
+                        class="collapse-content flex flex-wrap gap-2 pt-2 justify-start max-h-60 overflow-y-auto"
+                    >
+                        <template x-for="g in genres" :key="g.name">
+                            <button
+                                type="button"
+                                class="btn btn-xs sm:btn-sm"
+                                :class="selectedGenres.includes(g.name) ? 'btn-primary' : 'btn-outline'"
+                                @click="toggleGenre(g.name)"
+                            >
+                                <span x-text="g.name"></span>
+                                <span
+                                    class="opacity-60 text-xs"
+                                    x-text="'(' + g.count + ')'"></span>
+                            </button>
+                        </template>
+                    </div>
+                </details>
+
+                <!-- Live Pool Status Indicator -->
+                <div class="text-sm opacity-75 flex justify-between px-1">
+                    <span>Matching anime in pool:</span>
+                    <span class="font-bold" x-text="filteredPoolCount"></span>
+                </div>
+
                 <button
                     class="btn btn-primary btn-block btn-lg text-lg"
                     @click="startGame()"
-                    :disabled="loading || (difficulty === 'genre' && !selectedGenre)"
+                    :disabled="loading || filteredPoolCount < totalRounds"
                 >
                     <span x-show="!loading">Start Game</span>
                     <span x-show="loading" class="loading loading-spinner"
                     ></span>
                 </button>
+
+                <p
+                    x-show="filteredPoolCount < totalRounds && dataset.length > 0"
+                    class="text-error text-sm text-center"
+                >
+                    Not enough anime match your criteria (need at least 5). Try
+                    broadening your rank or genre filters.
+                </p>
             </div>
             <div class="mt-12 text-lg opacity-60">
                 <p>

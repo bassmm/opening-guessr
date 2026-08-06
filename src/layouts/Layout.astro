@@ -19,6 +19,10 @@ const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
         />
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
+        <meta
+            name="description"
+            content="Guess the anime from its opening theme!"
+        />
         <meta property="og:title" content={title} />
         <meta
             property="og:description"
@@ -35,6 +39,7 @@ const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
         <div class="fixed top-4 right-4 z-50" x-data="{ open: false }">
             <button
                 class="btn btn-sm btn-ghost btn-square"
+                aria-label="Theme selector"
                 @click="open = !open"
                 @click.outside="open = false"
             >
