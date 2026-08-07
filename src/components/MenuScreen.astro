@@ -8,7 +8,26 @@
                 </p>
             </div>
             <div class="flex flex-col gap-6">
+                <!-- List Mode Toggle -->
+                <div class="join w-full">
+                    <button
+                        class="join-item btn btn-lg flex-1"
+                        :class="{ 'btn-active': listMode === 'popular' }"
+                        @click="setListMode('popular')"
+                    >
+                        Popularity
+                    </button>
+                    <button
+                        class="join-item btn btn-lg flex-1"
+                        :class="{ 'btn-active': listMode === 'mal' }"
+                        @click="setListMode('mal')"
+                    >
+                        My MAL List
+                    </button>
+                </div>
+
                 <select
+                    x-show="listMode === 'popular'"
                     class="select select-bordered select-lg w-full text-lg"
                     x-model="difficulty"
                 >
@@ -18,6 +37,57 @@
                     <option value="1000">Top 1000</option>
                     <option value="2500">Top 2500</option>
                 </select>
+
+                <!-- MAL List Loader -->
+                <div x-show="listMode === 'mal'" class="flex flex-col gap-3">
+                    <div class="join w-full">
+                        <input
+                            type="text"
+                            placeholder="MyAnimeList username"
+                            class="input input-bordered input-lg join-item flex-1 text-lg"
+                            x-model="malUsername"
+                            @keydown.enter="loadMalList()"
+                            :disabled="malLoading"
+                        />
+                        <button
+                            class="btn btn-lg join-item"
+                            @click="loadMalList()"
+                            :disabled="malLoading || !malUsername.trim()"
+                        >
+                            <span x-show="!malLoading">Load</span>
+                            <span
+                                x-show="malLoading"
+                                class="loading loading-spinner"
+                            ></span>
+                        </button>
+                    </div>
+                    <p
+                        x-show="malProgress"
+                        class="text-sm opacity-75"
+                        x-text="malProgress"
+                    ></p>
+                    <p
+                        x-show="malError"
+                        class="text-error text-sm"
+                        x-text="malError"
+                    ></p>
+                    <div
+                        x-show="malPool.length > 0 && !malLoading"
+                        class="text-sm opacity-75 flex items-center justify-between px-1"
+                    >
+                        <span>
+                            Openings found:
+                            <span class="font-bold" x-text="malPool.length"></span>
+                        </span>
+                        <button
+                            class="btn btn-xs btn-ghost"
+                            @click="loadMalList(true)"
+                            title="Re-fetch list and ignore cache"
+                        >
+                            Reload list
+                        </button>
+                    </div>
+                </div>
 
                 <!-- Optional Genre Filter Multi-Select Collapse -->
                 <details
@@ -34,7 +104,7 @@
                     <div
                         class="collapse-content flex flex-wrap gap-2 pt-2 justify-start max-h-60 overflow-y-auto"
                     >
-                        <template x-for="g in genres" :key="g.name">
+                        <template x-for="g in activeGenres" :key="g.name">
                             <button
                                 type="button"
                                 class="btn btn-xs sm:btn-sm"
@@ -59,7 +129,7 @@
                 <button
                     class="btn btn-primary btn-block btn-lg text-lg"
                     @click="startGame()"
-                    :disabled="loading || filteredPoolCount < totalRounds"
+                    :disabled="loading || malLoading || filteredPoolCount < totalRounds"
                 >
                     <span x-show="!loading">Start Game</span>
                     <span x-show="loading" class="loading loading-spinner"
@@ -67,11 +137,17 @@
                 </button>
 
                 <p
-                    x-show="filteredPoolCount < totalRounds && dataset.length > 0"
+                    x-show="filteredPoolCount < totalRounds && (listMode === 'mal' ? malPool.length > 0 : dataset.length > 0)"
                     class="text-error text-sm text-center"
                 >
-                    Not enough anime match your criteria (need at least 5). Try
-                    broadening your rank or genre filters.
+                    <span x-show="listMode === 'popular'">
+                        Not enough anime match your criteria (need at least 5).
+                        Try broadening your rank or genre filters.
+                    </span>
+                    <span x-show="listMode === 'mal'">
+                        Not enough anime match your criteria (need at least 5).
+                        Try removing genre filters.
+                    </span>
                 </p>
             </div>
             <div class="mt-12 text-lg opacity-60">

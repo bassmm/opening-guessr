@@ -1,4 +1,5 @@
 import Plyr from "plyr";
+import { loadMalPool } from "./mal-pool.js";
 
 document.addEventListener("alpine:init", () => {
   Alpine.data("game", () => ({
@@ -28,6 +29,13 @@ document.addEventListener("alpine:init", () => {
     coverLoading: false,
     coverCache: {},
     suggestAbove: false,
+    listMode: "popular",
+    malUsername: "",
+    malPool: [],
+    malGenres: [],
+    malLoading: false,
+    malProgress: "",
+    malError: "",
 
     init() {
       this.highScore = parseInt(
@@ -62,16 +70,65 @@ document.addEventListener("alpine:init", () => {
     },
 
     get filteredPoolCount() {
-      if (!this.dataset || !this.dataset.length) return 0;
+      const source = this.listMode === "mal" ? this.malPool : this.dataset;
+      if (!source || !source.length) return 0;
       const limit = parseInt(this.difficulty);
-      return this.dataset.filter((d) => {
-        const matchesRank = d.rank !== null && d.rank <= limit;
-        if (!matchesRank) return false;
+      return source.filter((d) => {
+        if (this.listMode !== "mal") {
+          const matchesRank = d.rank !== null && d.rank <= limit;
+          if (!matchesRank) return false;
+        }
         if (this.selectedGenres.length > 0) {
           return this.selectedGenres.every((g) => (d.genres || []).includes(g));
         }
         return true;
       }).length;
+    },
+
+    get activeGenres() {
+      return this.listMode === "mal" ? this.malGenres : this.genres;
+    },
+
+    setListMode(mode) {
+      if (this.listMode === mode) return;
+      this.listMode = mode;
+      this.selectedGenres = [];
+    },
+
+    async loadMalList(force = false) {
+      const username = this.malUsername.trim();
+      if (!username || this.malLoading) return;
+      this.malLoading = true;
+      this.malError = "";
+      this.malProgress = "Fetching list from MyAnimeList...";
+      try {
+        this.malPool = await loadMalPool(username, {
+          force,
+          onProgress: (done, total) => {
+            this.malProgress = `Matching openings... (${done}/${total})`;
+          },
+        });
+        const counts = {};
+        this.malPool.forEach((a) =>
+          (a.genres || []).forEach((g) => {
+            counts[g] = (counts[g] || 0) + 1;
+          })
+        );
+        this.malGenres = Object.entries(counts)
+          .sort((a, b) => b[1] - a[1])
+          .map(([name, count]) => ({ name, count }));
+        this.selectedGenres = [];
+        if (!this.malPool.length) {
+          this.malError = "No openings found for this list.";
+        }
+      } catch (e) {
+        this.malPool = [];
+        this.malGenres = [];
+        this.malError = e.message || "Failed to load anime list.";
+      } finally {
+        this.malLoading = false;
+        this.malProgress = "";
+      }
     },
 
     toggleGenre(genreName) {
@@ -182,12 +239,14 @@ document.addEventListener("alpine:init", () => {
       this.loading = true;
 
       const run = (data) => {
-        this.dataset = data;
+        if (this.listMode !== "mal") this.dataset = data;
 
         const limit = parseInt(this.difficulty);
         this.pool = data.filter((d) => {
-          const matchesRank = d.rank !== null && d.rank <= limit;
-          if (!matchesRank) return false;
+          if (this.listMode !== "mal") {
+            const matchesRank = d.rank !== null && d.rank <= limit;
+            if (!matchesRank) return false;
+          }
           if (this.selectedGenres.length > 0) {
             return this.selectedGenres.every((g) => (d.genres || []).includes(g));
           }
@@ -218,7 +277,9 @@ document.addEventListener("alpine:init", () => {
           this.coverUrl = null;
       };
 
-      if (this.dataset.length) {
+      if (this.listMode === "mal") {
+        run(this.malPool);
+      } else if (this.dataset.length) {
         run(this.dataset);
       } else {
         fetch("/data/openings.json")

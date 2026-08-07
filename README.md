@@ -8,7 +8,7 @@ Built with [Astro](https://astro.build), [AlpineJS](https://alpinejs.dev), [dais
 
 ## How it works
 
-1. Choose a difficulty (Top 50 / 100 / 500 / 1000 / 2500 by popularity) + **NEW** Genre filter to guess openings from specific genres in Top 2500 list.
+1. Choose a pool: a difficulty (Top 50 / 100 / 500 / 1000 / 2500 by popularity) or **My MAL List** (openings from your own MyAnimeList list) + optional genre filter.
 2. Listen to the opening theme in audio mode (worth 1000 pts)
 3. Type the anime name — search-as-you-type filters the pool
 4. Optionally unlock the **blurred video** (halves the round to 500 pts permanently)
@@ -22,7 +22,7 @@ Built with [Astro](https://astro.build), [AlpineJS](https://alpinejs.dev), [dais
 | UI logic | [AlpineJS](https://alpinejs.dev) 3 |
 | Styles | [Tailwind CSS](https://tailwindcss.com) 4 + [daisyUI](https://daisyui.com) 5 |
 | Media | [Plyr](https://plyr.io) with `--plyr-color-main` bound to daisyUI's `--color-primary` |
-| Data | Tenrai API (popularity-ranked anime list) + AnimeThemes API (opening audio/video links) + AniListAPI (covers) |
+| Data | Tenrai API (popularity-ranked anime list) + AnimeThemes API (opening audio/video links) + AniListAPI (covers) + MyAnimeList API v2 (user lists, via Netlify function) |
 
 ## Project structure
 
@@ -43,9 +43,13 @@ src/
 ├── pages/
 │   └── index.astro          # Entry point, components + Alpine data definition
 ├── scripts/
-│   └── game.js              # Alpine game component (Plyr, state, game logic)
+│   ├── game.js              # Alpine game component (Plyr, state, game logic)
+│   └── mal-pool.js          # My MAL List mode: list fetch + AnimeThemes resolver + cache
 └── styles/
     └── global.css           # Tailwind + daisyUI + Pixelify Sans font
+netlify/
+└── functions/
+    └── animelist.mjs        # MAL API v2 proxy (keeps MAL_CLIENT_ID server-side)
 ```
 
 ## Development
@@ -73,6 +77,16 @@ pnpm preview     # Preview the production build locally
 ```
 
 The `prebuild` step (`node src/data/fetch-openings.mjs`) paginates through the Tenrai API (2500 most popular anime), derives AnimeThemes slugs from titles, fetches opening audio/video links, and writes `public/data/openings.json`. Entries without a matching AnimeThemes opening are silently skipped (~1020 of 2500).
+
+## My MAL List mode
+
+Instead of the popularity-ranked pool, players can enter a MyAnimeList username to play openings from anime on that user's list (completed / watching / on-hold / dropped — plan-to-watch is excluded).
+
+- `netlify/functions/animelist.mjs` proxies the [MAL API v2](https://myanimelist.net/apiconfig) user animelist endpoint. Public lists only need a Client ID (no OAuth); the function keeps it server-side via the `MAL_CLIENT_ID` env var (see `.env.example`).
+- `src/scripts/mal-pool.js` fetches the list, resolves openings at runtime via the AnimeThemes GraphQL API (batched, same query as the build script), and caches the pool in `localStorage` for 24h.
+- Genre filtering works in this mode too (genres come from the MAL API).
+
+To run this mode locally, use `netlify dev` (wraps `astro dev`) so the function is served alongside the site.
 
 ## Game mechanics
 
