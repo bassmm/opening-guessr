@@ -1,0 +1,5 @@
+[[redirects]]
+  from = "https://opguessr.netlify.app*"
+  to = "https://www.opguessr.com"
+  status = 301
+  force = true
