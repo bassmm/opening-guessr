@@ -20,8 +20,12 @@ fetch-output.log
 # macOS-specific files
 .DS_Store
 
-# jetbrains setting folder
+# ide settings folder
 .idea/
+.vscode/
 
 # Local Netlify folder
 .netlify
+
+# AI config
+.opencode/
