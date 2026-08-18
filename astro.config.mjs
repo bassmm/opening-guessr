@@ -9,7 +9,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://opguessr.netlify.app/",
+  site: "https://www.opguessr.com",
   vite: {
     plugins: [tailwindcss()]
   },

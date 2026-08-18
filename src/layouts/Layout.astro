@@ -1,12 +1,19 @@
 ---
+import { SEO } from "astro-seo";
 import "../styles/global.css";
 
 export interface Props {
     title?: string;
+    description?: string;
 }
 
-const { title = "Opening Guessr" } = Astro.props;
+const {
+    title = "Opening Guessr - Anime Opening Quiz",
+    description =
+        "Play a free anime opening quiz. Listen to anime theme songs, guess the anime, and test your knowledge with Opening Guessr.",
+} = Astro.props;
 
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
 ---
 
@@ -19,21 +26,59 @@ const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
         />
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
-        <meta
-            name="description"
-            content="Guess the anime from its opening theme!"
+        <SEO
+            title={title}
+            description={description}
+            canonical={canonicalUrl}
+            openGraph={{
+                basic: {
+                    title,
+                    type: "website",
+                    image: defaultImageWithDomain,
+                    url: canonicalUrl,
+                },
+                optional: {
+                    description,
+                    siteName: "Opening Guessr",
+                    locale: "en_US",
+                },
+                image: {
+                    alt: "Opening Guessr anime opening quiz",
+                },
+            }}
+            twitter={{
+                card: "summary_large_image",
+                title,
+                description,
+                image: defaultImageWithDomain,
+                imageAlt: "Opening Guessr anime opening quiz",
+            }}
+            extend={{
+                link: [
+                    { rel: "sitemap", href: "/sitemap-index.xml" },
+                    { rel: "icon", type: "image/png", href: "/favicon.png" },
+                    {
+                        rel: "apple-touch-icon",
+                        sizes: "300x300",
+                        href: "/favicon.png",
+                    },
+                ],
+            }}
         />
-        <meta property="og:title" content={title} />
-        <meta
-            property="og:description"
-            content="Guess the anime from its opening theme!"
-        />
-        <meta property="og:image" content={defaultImageWithDomain} />
-        <meta property="og:url" content={Astro.site} />
-        <meta property="og:type" content="website" />
-        <link rel="icon" type="image/png" href="/favicon.png" />
-        <link rel="apple-touch-icon" sizes="300x300" href="/favicon.png" />
-        <title>{title}</title>
+        <script type="application/ld+json" set:html={JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "Opening Guessr",
+            url: Astro.site?.href,
+            description,
+            applicationCategory: "Game",
+            operatingSystem: "Any",
+            offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "USD",
+            },
+        })}></script>
         <script
             defer
             src="https://cloud.umami.is/script.js"
