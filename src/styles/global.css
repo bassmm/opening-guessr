@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Geist+Pixel&family=Pixelify+Sans:wght@400..700&display=swap');
 @import "@phosphor-icons/web/regular";
 @import "tailwindcss";
 @plugin "daisyui" {
@@ -6,7 +6,11 @@
 }
 
 html {
-  font-family: "Pixelify Sans", sans-serif;
+  font-family: "Geist Pixel", sans-serif;
+}
+
+[x-cloak] {
+  display: none !important;
 }
 
 /* Plyr Customization */

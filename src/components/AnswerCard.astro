@@ -9,15 +9,14 @@
         <div class="flex gap-4 sm:gap-6 items-start w-full max-w-lg">
             <div
                 x-show="coverLoading"
-                class="skeleton w-24 sm:w-36 shrink-0 rounded-box"
-                style="aspect-ratio: 3/4"
+                class="skeleton w-24 sm:w-36 shrink-0 rounded-box aspect-2/3"
             >
             </div>
             <img
                 x-show="coverUrl"
                 :src="coverUrl"
                 :alt="correctTitle"
-                class="w-24 sm:w-36 shrink-0 rounded-box shadow-md"
+                class="w-24 sm:w-36 aspect-2/3 shrink-0 rounded-box shadow-md"
             />
             <div class="flex flex-col gap-2 min-w-0 text-left">
                 <div>
@@ -51,15 +50,15 @@
                         <div
                             class="text-xl"
                             :class="r.correct ? 'text-success' : 'text-error'"
-                            x-text="r.correct ? '●' : '○'"
                         >
+                            ●
                         </div>
                     </template>
                     <template
                         x-for="i in (totalRounds - results.length)"
                         :key="'empty-' + i"
                     >
-                        <div class="text-xl text-base-300">○</div>
+                        <div class="text-xl">○</div>
                     </template>
                 </div>
             </div>

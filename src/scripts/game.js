@@ -382,7 +382,7 @@ document.addEventListener("alpine:init", () => {
         this.coverUrl = this.coverCache[malId];
       } else {
         this.coverLoading = true;
-        const q = `query ($idMal: Int) { Media(idMal: $idMal, type: ANIME) { coverImage { large } } }`;
+        const q = `query ($idMal: Int) { Media(idMal: $idMal, type: ANIME) { coverImage { extraLarge } } }`;
         fetch("https://graphql.anilist.co", {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -390,7 +390,7 @@ document.addEventListener("alpine:init", () => {
         })
           .then((r) => r.json())
           .then((d) => {
-            const url = d?.data?.Media?.coverImage?.large;
+            const url = d?.data?.Media?.coverImage?.extraLarge;
             if (url) {
               this.coverCache[malId] = url;
               this.coverUrl = url;
