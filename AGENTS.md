@@ -86,3 +86,8 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+# Frontend Guidelines
+
+- Design UI using only Daisy UI conponents (use context7 to look up components) as much as possible, avoid writing tailwind classes if a DaisyUI component exists that can be used.
+- Prioritise using exclusively alpine for interactivity. Avoid utilising custom javascript scripts as much as possible.

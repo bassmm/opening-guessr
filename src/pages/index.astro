@@ -13,6 +13,7 @@ import "plyr/dist/plyr.css";
 <Layout
     title="Opening Guessr - Anime Opening Quiz"
     description="Play a free anime opening quiz. Listen to anime theme songs, guess the anime, and test your knowledge with Opening Guessr."
+    ogImage={new URL("/open-graph/home.png", Astro.site).href}
 >
     <div x-data="game()" class="min-h-screen flex flex-col">
         <template x-if="screen === 'menu'">

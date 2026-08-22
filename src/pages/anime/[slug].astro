@@ -1,0 +1,287 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { loadOpenings } from "../../data/load-openings.js";
+import { readCache, writeEntry } from "../../scripts/cover-cache.js";
+
+export async function getStaticPaths() {
+    const openings = await loadOpenings();
+    return openings.map((anime) => ({
+        params: { slug: anime.slug },
+        props: { anime },
+    }));
+}
+
+const { anime } = Astro.props;
+const displayName = anime.name_english || anime.name;
+const yearLabel = anime.year ? String(anime.year) : null;
+const title = `${displayName} | Opening Guessr`;
+const description = `Guess ${displayName}${yearLabel ? ` (${yearLabel})` : ""} from its opening theme${anime.song?.title ? ` — ${anime.song.title} by ${anime.song.artist || "unknown artist"}` : ""}. Test your anime knowledge with Opening Guessr.`;
+const ogImage = new URL(
+    `/open-graph/anime/${anime.slug}.png`,
+    Astro.site
+).href;
+const cachedCover = readCache()[anime.mal_id] ?? null;
+
+const starSteps = [];
+for (let i = 1; i <= 10; i++) {
+    const value = i / 2;
+    starSteps.push({
+        value,
+        half: value % 1 !== 0 ? "mask-half-1" : "mask-half-2",
+    });
+}
+const roundedHalf =
+    anime.score != null ? Math.round((anime.score / 2) * 2) / 2 : null;
+---
+
+<Layout title={title} description={description} ogImage={ogImage}>
+    <div class="min-h-screen bg-base-200">
+        <div class="navbar bg-base-100 shadow-sm px-4 sm:px-6 py-3 min-h-16">
+            <div class="navbar-start">
+                <a href="/anime/" class="btn btn-ghost btn-sm">← All anime</a>
+            </div>
+            <div class="navbar-center">
+                <a
+                    href="/"
+                    class="text-4xl font-bold text-shadow-primary text-shadow-xs"
+                    >Opening Guessr</a
+                >
+            </div>
+            <div class="navbar-end"></div>
+        </div>
+
+        <main class="max-w-3xl mx-auto px-4 py-8 sm:py-12">
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body gap-6">
+                    <div class="flex flex-col sm:flex-row gap-6">
+                        <div
+                            class="relative shrink-0 mx-auto sm:mx-0 w-48 h-64"
+                        >
+                            <div
+                                id="anime-cover-skeleton"
+                                class="skeleton absolute inset-0 rounded-box"
+                            >
+                            </div>
+                            <img
+                                id="anime-cover"
+                                data-mal-id={anime.mal_id}
+                                src={cachedCover ?? undefined}
+                                alt={displayName}
+                                class="absolute inset-0 h-full w-full object-cover rounded-box shadow-lg opacity-0 transition-opacity"
+                            />
+                        </div>
+                        <div class="flex-1">
+                            {
+                                yearLabel ? (
+                                    <p class="py-1 text-lg text-base-content/60">
+                                        {yearLabel}
+                                    </p>
+                                ) : null
+                            }
+
+                            <h1 class="text-3xl font-bold">{displayName}</h1>
+                            {
+                                anime.name_english &&
+                                anime.name_english !== anime.name ? (
+                                    <p class="text-lg opacity-75">
+                                        {anime.name}
+                                    </p>
+                                ) : null
+                            }
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <a
+                                    href={`https://myanimelist.net/anime/${anime.mal_id}`}
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="badge badge-sm bg-[#2E51A2] link link-hover gap-2 border-transparent text-white"
+                                >
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        class="h-3.5 w-3.5"
+                                        fill="currentColor"
+                                        aria-hidden="true"
+                                        ><path
+                                            d="M4 20 V5 h5 l3 5 3-5 h5 v15 h-4 v-8 l-4 6-4-6 v8 Z"
+                                        ></path></svg
+                                    >
+                                    <span class="">MAL</span>
+                                </a>
+                                <a
+                                    href={`https://anilist.co/anime/${anime.mal_id}`}
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="badge badge-sm bg-[#02A9FF] link link-hover gap-2 border-transparent text-white"
+                                >
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        class="h-3.5 w-3.5"
+                                        fill="currentColor"
+                                        aria-hidden="true"
+                                        ><path
+                                            d="M12 3 3 20h4.5l4.5-9 4.5 9H21L12 3Z"
+                                        ></path></svg
+                                    >
+                                    <span class="link link-hover">AniList</span>
+                                </a>
+                            </div>
+
+                            <div
+                                class="mt-6 flex flex-wrap items-center gap-2 text-sm"
+                            >
+                                {
+                                    anime.score != null ? (
+                                        <div class="badge badge-soft badge-warning badge-xl">
+                                            <div
+                                                class="rating rating-half rating-sm"
+                                                role="img"
+                                                aria-label={`Rating ${anime.score} out of 10`}
+                                            >
+                                                {starSteps.map((step) => (
+                                                    <input
+                                                        type="radio"
+                                                        name={`rating-${anime.mal_id}`}
+                                                        class={`mask mask-star-2 ${step.half} bg-orange-400`}
+                                                        disabled
+                                                        checked={
+                                                            step.value ===
+                                                            roundedHalf
+                                                        }
+                                                        aria-label={`${step.value} star`}
+                                                    />
+                                                ))}
+                                            </div>
+                                            <span class="opacity-75">
+                                                {anime.score}
+                                            </span>
+                                        </div>
+                                    ) : null
+                                }
+                                {
+                                    anime.rank != null ? (
+                                        <span class="badge badge-xl badge-soft badge-error">
+                                            <i class="ph ph-heart" />
+                                            No. {anime.rank} Most Popular
+                                        </span>
+                                    ) : null
+                                }
+
+                                {
+                                    anime.genres && anime.genres.length > 0 ? (
+                                        <div class="flex flex-wrap gap-2 mt-6">
+                                            {anime.genres.map((g) => (
+                                                <span class="badge badge-neutral">
+                                                    {g}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : null
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1 border border-neutral">
+                        {
+                            anime.song?.title ? (
+                                <div class="text-lg mt-2">
+                                    <i class="text-2xl align-middle ml-3 ph ph-cassette-tape" />{" "}
+                                    <span class="font-semibold">
+                                        {anime.song.title}
+                                    </span>
+                                    {anime.song.artist ? (
+                                        <span class="opacity-75 text-sm">
+                                            {" - "}
+                                            {anime.song.artist}
+                                        </span>
+                                    ) : null}
+                                </div>
+                            ) : null
+                        }
+
+                        {
+                            anime.audio ? (
+                                <div class="w-full">
+                                    <audio
+                                        id="anime-audio"
+                                        src={anime.audio}
+                                        preload="none"
+                                        class="w-full"
+                                    />
+                                </div>
+                            ) : null
+                        }
+                    </div>
+
+                    <div class="flex flex-wrap gap-6">
+                        <a href="/" class="btn btn-primary">Play the game</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        import { readCache, writeEntry } from "../../scripts/cover-cache.js";
+        import Plyr from "plyr";
+        import "plyr/dist/plyr.css";
+
+        const audioEl = document.getElementById("anime-audio");
+        if (audioEl) {
+            const cs = getComputedStyle(document.documentElement)
+                .getPropertyValue("color-scheme")
+                .trim();
+            new Plyr(audioEl, {
+                theme: cs === "dark" ? "dark" : "light",
+                controls: [
+                    "play-large",
+                    "play",
+                    "progress",
+                    "current-time",
+                    "mute",
+                    "volume",
+                    "fullscreen",
+                ],
+            });
+        }
+
+        const img = document.getElementById("anime-cover");
+        const skeleton = document.getElementById("anime-cover-skeleton");
+        const malId = parseInt(img.getAttribute("data-mal-id"), 10);
+        const cached = readCache()[malId];
+        if (cached && !img.getAttribute("src")) img.src = cached;
+        const reveal = () => {
+            img.classList.remove("opacity-0");
+            if (skeleton && skeleton.parentNode)
+                skeleton.parentNode.removeChild(skeleton);
+        };
+        if (img.complete && img.naturalWidth > 0) reveal();
+        else img.addEventListener("load", reveal, { once: true });
+        if (!cached) {
+            fetch("https://graphql.anilist.co", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    query: "query ($idMal: Int) { Media(idMal: $idMal, type: ANIME) { coverImage { extraLarge } } }",
+                    variables: { idMal: malId },
+                }),
+            })
+                .then((r) => r.json())
+                .then((d) => {
+                    const url =
+                        d &&
+                        d.data &&
+                        d.data.Media &&
+                        d.data.Media.coverImage &&
+                        d.data.Media.coverImage.extraLarge;
+                    if (url) {
+                        img.src = url;
+                        writeEntry(malId, url);
+                    }
+                })
+                .catch(() => {});
+        }
+    </script>
+</Layout>

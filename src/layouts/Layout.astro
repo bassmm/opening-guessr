@@ -5,20 +5,28 @@ import "../styles/global.css";
 export interface Props {
     title?: string;
     description?: string;
+    ogImage?: string;
 }
 
 const {
     title = "Opening Guessr - Anime Opening Quiz",
-    description =
-        "Play a free anime opening quiz. Listen to anime theme songs, guess the anime, and test your knowledge with Opening Guessr.",
+    description = "Play a free anime opening quiz. Listen to anime theme songs, guess the anime, and test your knowledge with Opening Guessr.",
+    ogImage,
 } = Astro.props;
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
-const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
+const ogImageUrl = ogImage ?? new URL("/opengraph.png", Astro.site).href;
 ---
 
-<html lang="en" data-theme="retro">
+<html lang="en">
     <head>
+        <script is:inline>
+            (function () {
+                var theme =
+                    localStorage.getItem("openingGuessr_theme") || "dracula";
+                document.documentElement.setAttribute("data-theme", theme);
+            })();
+        </script>
         <meta charset="utf-8" />
         <meta
             name="google-site-verification"
@@ -26,6 +34,21 @@ const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
         />
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
+        <link
+            rel="icon"
+            type="image/png"
+            href="/favicon-96x96.png?v=20260819"
+            sizes="96x96"
+        />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260819" />
+        <link rel="shortcut icon" href="/favicon.ico?v=20260819" />
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/apple-touch-icon.png?v=20260819"
+        />
+        <meta name="apple-mobile-web-app-title" content="OpGuessr" />
+        <link rel="manifest" href="/site.webmanifest?v=20260819" />
         <SEO
             title={title}
             description={description}
@@ -34,7 +57,7 @@ const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
                 basic: {
                     title,
                     type: "website",
-                    image: defaultImageWithDomain,
+                    image: ogImageUrl,
                     url: canonicalUrl,
                 },
                 optional: {
@@ -50,35 +73,30 @@ const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
                 card: "summary_large_image",
                 title,
                 description,
-                image: defaultImageWithDomain,
+                image: ogImageUrl,
                 imageAlt: "Opening Guessr anime opening quiz",
             }}
             extend={{
-                link: [
-                    { rel: "sitemap", href: "/sitemap-index.xml" },
-                    { rel: "icon", type: "image/png", href: "/favicon.png" },
-                    {
-                        rel: "apple-touch-icon",
-                        sizes: "300x300",
-                        href: "/favicon.png",
-                    },
-                ],
+                link: [{ rel: "sitemap", href: "/sitemap-index.xml" }],
             }}
         />
-        <script type="application/ld+json" set:html={JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            name: "Opening Guessr",
-            url: Astro.site?.href,
-            description,
-            applicationCategory: "Game",
-            operatingSystem: "Any",
-            offers: {
-                "@type": "Offer",
-                price: "0",
-                priceCurrency: "USD",
-            },
-        })}></script>
+        <script
+            type="application/ld+json"
+            set:html={JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "WebApplication",
+                name: "Opening Guessr",
+                url: Astro.site?.href,
+                description,
+                applicationCategory: "Game",
+                operatingSystem: "Any",
+                offers: {
+                    "@type": "Offer",
+                    price: "0",
+                    priceCurrency: "USD",
+                },
+            })}
+        />
         <script
             defer
             src="https://cloud.umami.is/script.js"
@@ -89,8 +107,8 @@ const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
                 crossorigin="anonymous"></script>
 
     </head>
-    <body class="min-h-screen bg-base-200 text-base-content">
-        <div class="fixed top-4 right-4 z-50" x-data="{ open: false }">
+    <body class="relative min-h-screen bg-base-200 text-base-content">
+        <div class="absolute top-4 right-4 z-50" x-data="{ open: false }">
             <button
                 class="btn btn-sm btn-ghost btn-square"
                 aria-label="Theme selector"
@@ -166,7 +184,10 @@ const defaultImageWithDomain = new URL("/opengraph.png", Astro.site).href;
                 "nord",
                 "sunset",
             ],
-            current: localStorage.getItem("openingGuessr_theme") || "dracula",
+            current:
+                document.documentElement.getAttribute("data-theme") ||
+                localStorage.getItem("openingGuessr_theme") ||
+                "dracula",
             set(theme) {
                 this.current = theme;
                 localStorage.setItem("openingGuessr_theme", theme);
