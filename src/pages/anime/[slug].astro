@@ -38,12 +38,15 @@ const roundedHalf =
     <div class="min-h-screen bg-base-200">
         <div class="navbar bg-base-100 shadow-sm px-4 sm:px-6 py-3 min-h-16">
             <div class="navbar-start">
-                <a href="/anime/" class="btn btn-ghost btn-sm">← All anime</a>
+                <a href="/anime/" class="btn btn-ghost btn-sm">
+                    <i class="ph ph-arrow-fat-left"></i>
+                    <span class="hidden sm:inline">All anime</span>
+                </a>
             </div>
             <div class="navbar-center">
                 <a
                     href="/"
-                    class="text-4xl font-bold text-shadow-primary text-shadow-xs"
+                    class="text-2xl sm:text-4xl font-bold text-shadow-primary text-shadow-xs"
                     >Opening Guessr</a
                 >
             </div>
@@ -225,7 +228,7 @@ const roundedHalf =
         import Plyr from "plyr";
         import "plyr/dist/plyr.css";
 
-        const audioEl = document.getElementById("anime-audio");
+        const audioEl = document.getElementById("anime-audio") as HTMLAudioElement | null;
         if (audioEl) {
             const cs = getComputedStyle(document.documentElement)
                 .getPropertyValue("color-scheme")
@@ -242,6 +245,45 @@ const roundedHalf =
                     "fullscreen",
                 ],
             });
+
+            let resolving = false;
+            audioEl.addEventListener("durationchange", () => {
+                if (!isFinite(audioEl.duration) && !resolving) {
+                    resolving = true;
+                    try { audioEl.currentTime = 1e101; } catch (e) {}
+                    const onTime = () => {
+                        audioEl.removeEventListener("timeupdate", onTime);
+                        resolving = false;
+                        if (isFinite(audioEl.duration) && audioEl.currentTime >= audioEl.duration) {
+                            audioEl.currentTime = 0;
+                        }
+                    };
+                    audioEl.addEventListener("timeupdate", onTime, { once: true });
+                }
+            });
+
+            let retries = 0;
+            let timer = null;
+            const arm = () => {
+                if (timer) clearTimeout(timer);
+                const ok = () => {
+                    if (timer) { clearTimeout(timer); timer = null; }
+                    audioEl.removeEventListener("canplay", ok);
+                    audioEl.removeEventListener("loadeddata", ok);
+                    audioEl.removeEventListener("error", err);
+                };
+                const err = () => {
+                    if (timer) { clearTimeout(timer); timer = null; }
+                    if (retries < 3) { retries++; audioEl.load(); arm(); }
+                };
+                audioEl.addEventListener("canplay", ok);
+                audioEl.addEventListener("loadeddata", ok);
+                audioEl.addEventListener("error", err);
+                timer = setTimeout(() => {
+                    if (retries < 3) { retries++; audioEl.load(); arm(); }
+                }, 2000);
+            };
+            arm();
         }
 
         const img = document.getElementById("anime-cover");

@@ -11,6 +11,9 @@ document.addEventListener("alpine:init", () => {
     totalRounds: 5,
     score: 0,
     mode: "audio",
+    audioPlyr: null,
+    videoPlyr: null,
+    playerError: false,
     videoUnlocked: false,
     dataset: [],
     pool: [],
@@ -59,12 +62,30 @@ document.addEventListener("alpine:init", () => {
         .catch(() => {});
       this.$watch("mode", (val, old) => {
         if (val === old) return;
-        this.$nextTick(() => this.initPlyr(val === "audio" ? "audio" : "video"));
+        this.$nextTick(() => {
+          if (val === "audio") this.initAudioPlyr();
+          else this.initVideoPlyr();
+          const el = val === "audio" ? this.$refs.audioPlayer : this.$refs.videoPlayer;
+          if (el) this.armLoadWatch(el, val);
+        });
+      });
+      this.$watch("current", () => {
+        this.$nextTick(() => {
+          const el = this.mode === "audio" ? this.$refs.audioPlayer : this.$refs.videoPlayer;
+          if (el) this.armLoadWatch(el, this.mode);
+        });
       });
       const observer = new MutationObserver(() => {
-        if (this.screen === "playing" && window.__plyr) {
-          this.$nextTick(() => this.initPlyr(this.mode));
-        }
+        if (this.screen !== "playing") return;
+        this.$nextTick(() => {
+          if (this.mode === "audio") {
+            if (this.audioPlyr) { this.audioPlyr.destroy(); this.audioPlyr = null; }
+            this.initAudioPlyr();
+          } else {
+            if (this.videoPlyr) { this.videoPlyr.destroy(); this.videoPlyr = null; }
+            this.initVideoPlyr();
+          }
+        });
       });
       observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     },
@@ -140,91 +161,200 @@ document.addEventListener("alpine:init", () => {
     },
 
     resetMedia() {
-      if (window.__plyr) {
-        window.__plyr.destroy();
-        window.__plyr = null;
-      }
       [this.$refs.audioPlayer, this.$refs.videoPlayer].forEach((el) => {
         if (!el) return;
+        this.clearLoadWatch(el);
         el.pause();
         el.removeAttribute("src");
         el.removeAttribute("data-preload-armed");
+        el.dataset.loadRetries = "0";
         el.preload = "none";
         el.load();
       });
+      this.playerError = false;
     },
 
     initPlyr(type) {
-      if (type === "video" && this.mode !== "video") return;
-      if (type === "audio" && this.mode !== "audio") return;
-      const key = type === "audio" ? "audioPlayer" : "videoPlayer";
-      this.$nextTick(() => {
-        const el = this.$refs[key];
-        if (!el) return;
-        if (window.__plyr) {
-          window.__plyr.destroy();
-          window.__plyr = null;
+      if (type === "audio") this.initAudioPlyr();
+      else this.initVideoPlyr();
+    },
+
+    initAudioPlyr() {
+      const el = this.$refs.audioPlayer;
+      if (!el || this.audioPlyr) return;
+      const cs = getComputedStyle(document.documentElement)
+        .getPropertyValue("color-scheme")
+        .trim();
+      this.audioPlyr = new Plyr(el, {
+        theme: cs === "dark" ? "dark" : "light",
+        controls: [
+          "play-large",
+          "play",
+          "progress",
+          "current-time",
+          "mute",
+          "volume",
+          "fullscreen",
+        ],
+      });
+      this.attachMediaHandlers(el, "audio");
+      this.resolveDuration(el, "audio");
+      this.prepareVideoPreload();
+    },
+
+    initVideoPlyr() {
+      const el = this.$refs.videoPlayer;
+      if (!el || this.videoPlyr) return;
+      const cs = getComputedStyle(document.documentElement)
+        .getPropertyValue("color-scheme")
+        .trim();
+      this.videoPlyr = new Plyr(el, {
+        theme: cs === "dark" ? "dark" : "light",
+        controls: [
+          "play-large",
+          "play",
+          "progress",
+          "current-time",
+          "mute",
+          "volume",
+          "fullscreen",
+        ],
+      });
+      this.attachMediaHandlers(el, "video");
+      if (el.readyState >= 1) {
+        const d = isFinite(el.duration) ? el.duration : null;
+        this.setVideoMarkers(d || 1);
+        if (d !== null) this.restoreStart(el, "video", d);
+      }
+      this.resolveDuration(el, "video");
+    },
+
+    prepareVideoPreload() {
+      const videoEl = this.$refs.videoPlayer;
+      if (!videoEl) return;
+      this.attachMediaHandlers(videoEl, "video");
+      if (videoEl.dataset.preloadArmed) return;
+      videoEl.dataset.preloadArmed = "1";
+      videoEl.preload = "metadata";
+    },
+
+    attachMediaHandlers(el, type) {
+      if (el.dataset.mediaHandlersArmed) return;
+      el.dataset.mediaHandlersArmed = "1";
+      el.addEventListener("loadedmetadata", () => {
+        const d = isFinite(el.duration) ? el.duration : null;
+        if (type === "video") this.setVideoMarkers(d || 1);
+        if (d !== null) this.restoreStart(el, type, d);
+        if (this.mode === type && !isFinite(el.duration)) {
+          this.resolveDuration(el, type);
         }
-        const elRoot = document.documentElement;
-        const cs = getComputedStyle(elRoot).getPropertyValue("color-scheme").trim();
-        const player = new Plyr(el, {
-          theme: cs === "dark" ? "dark" : "light",
-          controls: [
-            "play-large",
-            "play",
-            "progress",
-            "current-time",
-            "mute",
-            "volume",
-            "fullscreen",
-          ],
-        });
-        if (type === "audio") {
-          this.setVideoPreload();
+      });
+      el.addEventListener("durationchange", () => {
+        if (isFinite(el.duration)) {
+          if (type === "video") this.setVideoMarkers(el.duration);
+          this.restoreStart(el, type, el.duration);
+        } else if (this.mode === type) {
+          this.resolveDuration(el, type);
         }
-        if (type === "video") {
-          player.on("ready", () => {
-            const dur = player.duration || 1;
-            const minPct = (25 / dur) * 100;
-            const maxPct = (65 / dur) * 100;
-            const container = player.elements.container;
-            if (container) {
-              container.style.setProperty(
-                "--min-percent",
-                minPct + "%"
-              );
-              container.style.setProperty(
-                "--max-percent",
-                maxPct + "%"
-              );
-            }
-            const progress = player.elements.progress;
-            if (progress) {
-              progress.style.setProperty("--min-percent", minPct + "%");
-              progress.style.setProperty("--max-percent", maxPct + "%");
-            }
-            el.currentTime = 25;
-          });
-        }
-        window.__plyr = player;
       });
     },
 
-    setVideoPreload() {
-      const videoEl = this.$refs.videoPlayer;
-      if (!videoEl || videoEl.dataset.preloadArmed) return;
-      videoEl.dataset.preloadArmed = "1";
-      videoEl.preload = "metadata";
-      const bufferFrom25 = () => {
-        if (videoEl.currentTime < 25) {
-          videoEl.currentTime = 25;
-        }
-      };
-      if (videoEl.readyState >= 1) {
-        bufferFrom25();
-      } else {
-        videoEl.addEventListener("loadedmetadata", bufferFrom25, { once: true });
+    resolveDuration(el, type) {
+      if (el.dataset.durationResolving) return;
+      if (isFinite(el.duration)) {
+        if (type === "video") this.setVideoMarkers(el.duration);
+        this.restoreStart(el, type, el.duration);
+        return;
       }
+      el.dataset.durationResolving = "1";
+      try { el.currentTime = 1e101; } catch (e) {}
+      const onTime = () => {
+        el.removeEventListener("timeupdate", onTime);
+        el.dataset.durationResolving = "";
+        const d = isFinite(el.duration) ? el.duration : 1;
+        if (type === "video") this.setVideoMarkers(d);
+        this.restoreStart(el, type, d);
+      };
+      el.addEventListener("timeupdate", onTime, { once: true });
+    },
+
+    restoreStart(el, type, d) {
+      if (type === "video") {
+        if (el.currentTime < 25 || el.currentTime >= d) el.currentTime = 25;
+      } else if (!isFinite(el.currentTime) || el.currentTime >= d) {
+        el.currentTime = 0;
+      }
+    },
+
+    setVideoMarkers(d) {
+      const player = this.videoPlyr;
+      if (!player) return;
+      const dur = d || 1;
+      const minPct = (25 / dur) * 100;
+      const maxPct = (65 / dur) * 100;
+      const container = player.elements?.container;
+      if (container) {
+        container.style.setProperty("--min-percent", minPct + "%");
+        container.style.setProperty("--max-percent", maxPct + "%");
+      }
+      const progress = player.elements?.progress;
+      if (progress) {
+        progress.style.setProperty("--min-percent", minPct + "%");
+        progress.style.setProperty("--max-percent", maxPct + "%");
+      }
+    },
+
+    armLoadWatch(el, type) {
+      this.clearLoadWatch(el);
+      this.playerError = false;
+      if (el.readyState >= 3) return;
+      const retries = parseInt(el.dataset.loadRetries || "0", 10);
+      if (retries >= 3) return;
+      const onOk = () => this.clearLoadWatch(el);
+      const fail = () => this.handleMediaFail(el, type);
+      el._loadWatchOk = onOk;
+      el._loadWatchErr = fail;
+      el.addEventListener("canplay", onOk);
+      el.addEventListener("loadeddata", onOk);
+      el.addEventListener("error", fail);
+      el._loadWatchTimer = setTimeout(() => this.handleMediaFail(el, type), 2000);
+    },
+
+    clearLoadWatch(el) {
+      if (el._loadWatchTimer) {
+        clearTimeout(el._loadWatchTimer);
+        el._loadWatchTimer = null;
+      }
+      if (el._loadWatchOk) {
+        el.removeEventListener("canplay", el._loadWatchOk);
+        el.removeEventListener("loadeddata", el._loadWatchOk);
+        el._loadWatchOk = null;
+      }
+      if (el._loadWatchErr) {
+        el.removeEventListener("error", el._loadWatchErr);
+        el._loadWatchErr = null;
+      }
+    },
+
+    handleMediaFail(el, type) {
+      const retries = parseInt(el.dataset.loadRetries || "0", 10);
+      this.clearLoadWatch(el);
+      if (retries < 3) {
+        el.dataset.loadRetries = String(retries + 1);
+        try { el.load(); } catch (e) {}
+        this.armLoadWatch(el, type);
+      } else {
+        this.playerError = true;
+      }
+    },
+
+    retryMedia() {
+      this.playerError = false;
+      const el = this.mode === "audio" ? this.$refs.audioPlayer : this.$refs.videoPlayer;
+      if (!el) return;
+      el.dataset.loadRetries = "0";
+      try { el.load(); } catch (e) {}
+      this.armLoadWatch(el, this.mode);
     },
 
     switchToVideo() {
@@ -422,8 +552,8 @@ document.addEventListener("alpine:init", () => {
       this.mode = "audio";
       this.videoUnlocked = false;
       this.resetMedia();
+      this.prepareVideoPreload();
         this.coverUrl = null;
-        this.$nextTick(() => this.initPlyr("audio"));
       },
 
       backToMenu() {

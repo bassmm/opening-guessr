@@ -22,7 +22,6 @@
             disablepictureinpicture
             class="w-full"
             :class="{ 'blur-[9px]': !answered }"
-            x-init="initPlyr('video')"
             @seeking="if ($el.currentTime < 25 || $el.currentTime > 65) $el.currentTime = Math.min(Math.max($el.currentTime, 25), 65)"
             @timeupdate="if ($el.currentTime >= 65) $el.pause()"
             @play="if ($el.currentTime >= 63) $el.currentTime = 25"></video>
@@ -30,4 +29,12 @@
     <p class="text-base opacity-50 text-center mt-2" x-show="mode === 'video'">
         Video starts at 25s and stops at 65s
     </p>
+    <template x-if="playerError">
+        <div class="alert alert-error shadow-lg mt-2" role="alert">
+            <div>
+                <span>Media failed to load. Check your connection and try again.</span>
+            </div>
+            <button class="btn btn-sm btn-primary" @click="retryMedia()">Retry</button>
+        </div>
+    </template>
 </div>
