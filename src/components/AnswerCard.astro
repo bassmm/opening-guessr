@@ -22,9 +22,12 @@
                 <div>
                     <p class="text-sm uppercase opacity-80">The answer is:</p>
                     <div class="flex flex-col items-baseline gap-x-2">
-                        <span
-                            class="text-lg sm:text-2xl font-bold"
-                            x-text="correctTitle"></span>
+                        <a
+                            :href="'/anime/' + current.slug"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-1 text-lg sm:text-2xl font-bold hover:underline"
+                        ><span x-text="correctTitle"></span><i class="ph ph-arrow-square-out text-base sm:text-lg opacity-60"></i></a>
                         <span
                             x-show="current?.name_english"
                             class="text-md sm:text-xl opacity-60"
@@ -45,20 +48,18 @@
                     x-text="(isCorrect ? (videoUnlocked ? '+500' : '+1000') : '+0') + ' points'"
                 >
                 </p>
-                <div class="flex gap-2 mt-1">
+                <div class="flex items-center gap-2 mt-1">
                     <template x-for="(r, i) in results" :key="i">
                         <div
-                            class="text-xl"
+                            class="w-4 h-4 rounded-full bg-current"
                             :class="r.correct ? 'text-success' : 'text-error'"
-                        >
-                            ●
-                        </div>
+                        ></div>
                     </template>
                     <template
                         x-for="i in (totalRounds - results.length)"
                         :key="'empty-' + i"
                     >
-                        <div class="text-xl">○</div>
+                        <div class="w-4 h-4 rounded-full border-2 border-base-content/40"></div>
                     </template>
                 </div>
             </div>
