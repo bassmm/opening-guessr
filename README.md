@@ -1,10 +1,10 @@
-# Opening Guessr <a href="https://opguessr.netlify.app"><img src="public/favicon.png" width="48" align="right"/></a>
+# Opening Guessr <a href="https://opguessr.netlify.app"><img src="public/favicon.svg" width="48" align="right"/></a>
 
 An anime opening guessing game — listen to a theme song, name the anime.
 
 Built with [Astro](https://astro.build), [AlpineJS](https://alpinejs.dev), [daisyUI](https://daisyui.com), and [Plyr](https://plyr.io).
 
-![Favicon](public/opengraph.png)
+<img width="2666" height="1520" alt="image" src="https://github.com/user-attachments/assets/61887c99-e848-48f0-8138-f7f73fe43e9d" />
 
 ## How it works
 
