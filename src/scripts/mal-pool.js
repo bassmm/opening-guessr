@@ -127,6 +127,7 @@ export async function resolveOpenings(entries, onProgress) {
         name_english: themeData.title?.english || null,
         titles,
         genres: entry.genres || [],
+        slug: op.slug,
         video: op.video,
         audio: op.audio,
         song: { title: op.songTitle, artist: op.songArtist },

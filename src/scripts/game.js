@@ -89,6 +89,20 @@ document.addEventListener("alpine:init", () => {
       return this.listMode === "mal" ? this.malGenres : this.genres;
     },
 
+    get directorySlugs() {
+      return new Set((this.dataset || []).map((a) => a.slug).filter(Boolean));
+    },
+
+    animeLink(a) {
+      if (a?.slug && this.directorySlugs.has(a.slug)) {
+        return "/anime/" + a.slug;
+      }
+      if (a?.mal_id) {
+        return "https://myanimelist.net/anime/" + a.mal_id;
+      }
+      return "#";
+    },
+
     setListMode(mode) {
       if (this.listMode === mode) return;
       this.listMode = mode;
