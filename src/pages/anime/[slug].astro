@@ -16,10 +16,7 @@ const displayName = anime.name_english || anime.name;
 const yearLabel = anime.year ? String(anime.year) : null;
 const title = `${displayName} | Opening Guessr`;
 const description = `Guess ${displayName}${yearLabel ? ` (${yearLabel})` : ""} from its opening theme${anime.song?.title ? ` — ${anime.song.title} by ${anime.song.artist || "unknown artist"}` : ""}. Test your anime knowledge with Opening Guessr.`;
-const ogImage = new URL(
-    `/open-graph/anime/${anime.slug}.png`,
-    Astro.site
-).href;
+const ogImage = new URL(`/open-graph/anime/${anime.slug}.png`, Astro.site).href;
 const cachedCover = readCache()[anime.mal_id] ?? null;
 
 const starSteps = [];
@@ -39,14 +36,14 @@ const roundedHalf =
         <div class="navbar bg-base-100 shadow-sm px-4 sm:px-6 py-3 min-h-16">
             <div class="navbar-start">
                 <a href="/anime/" class="btn btn-ghost btn-sm">
-                    <i class="ph ph-arrow-fat-left"></i>
+                    <i class="ph ph-arrow-circle-left text-3xl"></i>
                     <span class="hidden sm:inline">All anime</span>
                 </a>
             </div>
             <div class="navbar-center">
                 <a
                     href="/"
-                    class="text-2xl sm:text-4xl font-bold text-shadow-primary text-shadow-xs"
+                    class="text-3xl sm:text-4xl font-bold text-shadow-primary text-shadow-xs"
                     >Opening Guessr</a
                 >
             </div>
@@ -59,10 +56,12 @@ const roundedHalf =
                     <div class="flex flex-col sm:flex-row gap-6">
                         <div
                             class="relative shrink-0 mx-auto sm:mx-0 w-48 h-64"
+                            x-data="{ loaded: false }"
+                            x-init="loaded = document.getElementById('anime-cover').complete && document.getElementById('anime-cover').naturalWidth > 0"
                         >
                             <div
-                                id="anime-cover-skeleton"
                                 class="skeleton absolute inset-0 rounded-box"
+                                x-show="!loaded"
                             >
                             </div>
                             <img
@@ -70,7 +69,9 @@ const roundedHalf =
                                 data-mal-id={anime.mal_id}
                                 src={cachedCover ?? undefined}
                                 alt={displayName}
-                                class="absolute inset-0 h-full w-full object-cover rounded-box shadow-lg opacity-0 transition-opacity"
+                                @load="loaded = true"
+                                class="absolute inset-0 h-full w-full object-cover rounded-box shadow-lg transition-opacity"
+                                :class="loaded ? 'opacity-100' : 'opacity-0'"
                             />
                         </div>
                         <div class="flex-1">
@@ -202,12 +203,15 @@ const roundedHalf =
                         }
 
                         {
-                            anime.audio ? (
+                            anime.video ? (
                                 <div class="w-full">
-                                    <audio
-                                        id="anime-audio"
-                                        src={anime.audio}
-                                        preload="none"
+                                    <video
+                                        id="anime-video"
+                                        src={anime.video}
+                                        poster={cachedCover ?? undefined}
+                                        preload="metadata"
+                                        controls
+                                        playsinline
                                         class="w-full"
                                     />
                                 </div>
@@ -225,60 +229,22 @@ const roundedHalf =
 
     <script>
         import { readCache, writeEntry } from "../../scripts/cover-cache.js";
-        import Plyr from "plyr";
+        import { fetchCover } from "../../scripts/cover-fetch.js";
+        import { initPlyr } from "../../scripts/plyr.js";
         import "plyr/dist/plyr.css";
 
-        const audioEl = document.getElementById("anime-audio");
-        if (audioEl) {
-            const cs = getComputedStyle(document.documentElement)
-                .getPropertyValue("color-scheme")
-                .trim();
-            new Plyr(audioEl, {
-                theme: cs === "dark" ? "dark" : "light",
-                controls: [
-                    "play-large",
-                    "play",
-                    "progress",
-                    "current-time",
-                    "mute",
-                    "volume",
-                    "fullscreen",
-                ],
-            });
+        const videoEl = document.getElementById("anime-video");
+        if (videoEl) {
+            initPlyr(videoEl, "video", { clip: false });
         }
 
         const img = document.getElementById("anime-cover");
-        const skeleton = document.getElementById("anime-cover-skeleton");
         const malId = parseInt(img.getAttribute("data-mal-id"), 10);
         const cached = readCache()[malId];
         if (cached && !img.getAttribute("src")) img.src = cached;
-        const reveal = () => {
-            img.classList.remove("opacity-0");
-            if (skeleton && skeleton.parentNode)
-                skeleton.parentNode.removeChild(skeleton);
-        };
-        if (img.complete && img.naturalWidth > 0) reveal();
-        else img.addEventListener("load", reveal, { once: true });
         if (!cached) {
-            fetch("https://graphql.anilist.co", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-                body: JSON.stringify({
-                    query: "query ($idMal: Int) { Media(idMal: $idMal, type: ANIME) { coverImage { extraLarge } } }",
-                    variables: { idMal: malId },
-                }),
-            })
-                .then((r) => r.json())
-                .then((d) => {
-                    const url =
-                        d &&
-                        d.data &&
-                        d.data.Media &&
-                        d.data.Media.coverImage &&
-                        d.data.Media.coverImage.extraLarge;
+            fetchCover(malId)
+                .then((url) => {
                     if (url) {
                         img.src = url;
                         writeEntry(malId, url);

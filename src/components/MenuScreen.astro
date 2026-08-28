@@ -36,13 +36,13 @@
                     <select
                         x-show="listMode === 'popular'"
                         class="select select-bordered select-lg w-full text-lg"
-                        x-model="difficulty"
+                        x-model.number="difficulty"
                     >
-                        <option value="50">Top 50</option>
-                        <option value="100">Top 100</option>
-                        <option value="500">Top 500</option>
-                        <option value="1000">Top 1000</option>
-                        <option value="2500">Top 2500</option>
+                        <option :value="50">Top 50</option>
+                        <option :value="100">Top 100</option>
+                        <option :value="500">Top 500</option>
+                        <option :value="1000">Top 1000</option>
+                        <option :value="2500">Top 2500</option>
                     </select>
 
                     <!-- MAL List Loader -->
@@ -168,9 +168,9 @@
                     </p>
                 </div>
                 <div class="mt-12 text-lg opacity-60">
-                    <p>
-                        5 rounds &middot; Audio mode: 1000 pts &middot; Video
-                        mode: 500 pts
+                    <p
+                        x-text="'5 rounds · Audio mode: ' + pointsAudio + ' pts · Video mode: ' + pointsVideo + ' pts'"
+                    >
                     </p>
                     <div class="flex gap-4 justify-center mt-4">
                         <kbd class="kbd kbd-lg">Enter</kbd>

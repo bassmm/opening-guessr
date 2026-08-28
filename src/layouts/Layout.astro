@@ -108,12 +108,18 @@ const ogImageUrl = ogImage ?? new URL("/opengraph.png", Astro.site).href;
 
     </head>
     <body class="relative min-h-screen bg-base-200 text-base-content">
-        <div class="absolute top-4 right-4 z-50" x-data="{ open: false }">
+        <div
+            class="dropdown dropdown-end absolute top-4 right-4 z-50"
+            :class="{ 'dropdown-open': open }"
+            x-data="{ open: false }"
+            @click.outside="open = false"
+        >
             <button
+                tabindex="0"
+                role="button"
                 class="btn btn-sm btn-ghost btn-square"
                 aria-label="Theme selector"
                 @click="open = !open"
-                @click.outside="open = false"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -130,18 +136,23 @@ const ogImageUrl = ogImage ?? new URL("/opengraph.png", Astro.site).href;
                     ></path>
                 </svg>
             </button>
-            <div
-                x-show="open"
-                class="absolute right-0 mt-2 w-44 bg-base-100 shadow-xl rounded-box p-2 border border-base-300 max-h-80 overflow-y-auto"
+            <ul
+                tabindex="-1"
+                class="dropdown-content menu bg-base-100 rounded-box z-1 mt-2 w-44 p-2 shadow-xl border border-base-300 max-h-80 overflow-y-auto overflow-x-hidden flex-nowrap"
             >
                 <template x-for="theme in $store.theme.themes" :key="theme">
-                    <button
-                        class="btn btn-sm btn-block justify-start text-left"
-                        :class="{ 'btn-primary': $store.theme.current === theme }"
-                        @click="$store.theme.set(theme); open = false"
-                        x-text="theme"></button>
+                    <li
+                        class="shrink-0"
+                        :class="{ 'menu-active': $store.theme.current === theme }"
+                    >
+                        <button
+                            class="justify-start text-left"
+                            @click="$store.theme.set(theme); open = false"
+                            x-text="theme"
+                        ></button>
+                    </li>
                 </template>
-            </div>
+            </ul>
         </div>
         <slot />
     </body>

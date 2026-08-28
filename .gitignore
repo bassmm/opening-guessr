@@ -29,3 +29,12 @@ fetch-output.log
 
 # AI config
 .opencode/
+
+# graphify knowledge-graph cache
+graphify-out/
+
+# generated data
+public/data/openings.json
+
+# deno lockfile (not a deno project)
+deno.lock

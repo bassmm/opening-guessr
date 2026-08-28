@@ -1,7 +1,14 @@
 <div class="w-full">
     <div class="flex gap-2">
-        <div class="relative flex-[3]">
+        <div
+            class="dropdown flex-3"
+            :class="{
+                'dropdown-open': searchResults.length !== 0,
+                'dropdown-top': suggestAbove,
+            }"
+        >
             <input
+                tabindex="0"
                 type="text"
                 class="input input-bordered w-full"
                 :class="{ 'input-error': invalidGuess }"
@@ -14,17 +21,19 @@
                 x-ref="searchInput"
             />
             <ul
-                class="absolute z-10 w-full bg-base-100 shadow-lg rounded-box max-h-60 overflow-auto"
-                :class="suggestAbove ? 'bottom-full mb-1' : 'top-full mt-1'"
-                x-show="searchResults.length > 0"
+                tabindex="-1"
+                class="dropdown-content bg-base-100 rounded-box z-10 w-full shadow-lg max-h-60 overflow-auto"
             >
                 <template x-for="result in searchResults" :key="result.name">
                     <li
-                        class="px-4 py-2 hover:bg-base-200 cursor-pointer"
+                        class="cursor-pointer px-4 py-2 hover:bg-base-200"
                         @click="selectGuess(result)"
                     >
                         <span x-text="result.name"></span>
-                        <span x-show="result.english" class="ml-2 opacity-60" x-text="result.english"></span>
+                        <span
+                            x-show="result.english"
+                            class="ml-2 opacity-60"
+                            x-text="result.english"></span>
                     </li>
                 </template>
             </ul>

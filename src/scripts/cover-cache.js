@@ -54,16 +54,8 @@ export function writeEntry(malId, url) {
     try {
         ls.setItem(KEY, JSON.stringify(parsed));
     } catch {
-        const now = Date.now();
-        for (const id of Object.keys(parsed.covers)) {
-            if (now - parsed.covers[id].ts > TTL_MS) delete parsed.covers[id];
-        }
         try {
-            ls.setItem(KEY, JSON.stringify(parsed));
-        } catch {
-            try {
-                ls.removeItem(KEY);
-            } catch {}
-        }
+            ls.removeItem(KEY);
+        } catch {}
     }
 }

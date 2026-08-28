@@ -1,10 +1,18 @@
-import Plyr from "plyr";
 import { loadMalPool } from "./mal-pool.js";
+import { readCache, writeEntry } from "./cover-cache.js";
+import { fetchCover } from "./cover-fetch.js";
+import { countGenres, filterPool, matchTitles, shuffle } from "./pool-utils.js";
+import { initPlyr as createPlyr, CLIP_START, CLIP_END } from "./plyr.js";
+
+const POINTS_AUDIO = 1000;
+const POINTS_VIDEO = 500;
 
 document.addEventListener("alpine:init", () => {
   Alpine.data("game", () => ({
     screen: "menu",
-    difficulty: "50",
+    difficulty: 50,
+    pointsAudio: POINTS_AUDIO,
+    pointsVideo: POINTS_VIDEO,
     selectedGenres: [],
     genres: [],
     round: 1,
@@ -27,7 +35,6 @@ document.addEventListener("alpine:init", () => {
     invalidGuess: false,
     coverUrl: null,
     coverLoading: false,
-    coverCache: {},
     suggestAbove: false,
     listMode: "popular",
     malUsername: "",
@@ -45,43 +52,27 @@ document.addEventListener("alpine:init", () => {
         .then((r) => r.json())
         .then((data) => {
           this.dataset = data;
-          const counts = {};
-          data.forEach((a) =>
-            (a.genres || []).forEach((g) => {
-              counts[g] = (counts[g] || 0) + 1;
-            })
-          );
-          this.genres = Object.entries(counts)
-            .filter(([g, c]) => c > 50)
-            .sort((a, b) => b[1] - a[1])
-            .map(([name, count]) => ({ name, count }));
+          this.genres = countGenres(data).filter((g) => g.count > 50);
         })
         .catch(() => {});
       this.$watch("mode", (val, old) => {
         if (val === old) return;
         this.$nextTick(() => this.initPlyr(val === "audio" ? "audio" : "video"));
       });
-      const observer = new MutationObserver(() => {
+      this.$watch("$store.theme.current", (val, old) => {
+        if (val === old) return;
         if (this.screen === "playing" && window.__plyr) {
           this.$nextTick(() => this.initPlyr(this.mode));
         }
       });
-      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     },
 
     get filteredPoolCount() {
       const source = this.listMode === "mal" ? this.malPool : this.dataset;
       if (!source || !source.length) return 0;
-      const limit = parseInt(this.difficulty);
-      return source.filter((d) => {
-        if (this.listMode !== "mal") {
-          const matchesRank = d.rank !== null && d.rank <= limit;
-          if (!matchesRank) return false;
-        }
-        if (this.selectedGenres.length > 0) {
-          return this.selectedGenres.every((g) => (d.genres || []).includes(g));
-        }
-        return true;
+      return filterPool(source, {
+        rankLimit: this.listMode === "mal" ? null : this.difficulty,
+        genres: this.selectedGenres,
       }).length;
     },
 
@@ -122,15 +113,7 @@ document.addEventListener("alpine:init", () => {
             this.malProgress = `Matching openings... (${done}/${total})`;
           },
         });
-        const counts = {};
-        this.malPool.forEach((a) =>
-          (a.genres || []).forEach((g) => {
-            counts[g] = (counts[g] || 0) + 1;
-          })
-        );
-        this.malGenres = Object.entries(counts)
-          .sort((a, b) => b[1] - a[1])
-          .map(([name, count]) => ({ name, count }));
+        this.malGenres = countGenres(this.malPool);
         this.selectedGenres = [];
         if (!this.malPool.length) {
           this.malError = "No openings found for this list.";
@@ -175,53 +158,25 @@ document.addEventListener("alpine:init", () => {
       this.$nextTick(() => {
         const el = this.$refs[key];
         if (!el) return;
-        if (window.__plyr) {
-          window.__plyr.destroy();
-          window.__plyr = null;
-        }
-        const elRoot = document.documentElement;
-        const cs = getComputedStyle(elRoot).getPropertyValue("color-scheme").trim();
-        const player = new Plyr(el, {
-          theme: cs === "dark" ? "dark" : "light",
-          controls: [
-            "play-large",
-            "play",
-            "progress",
-            "current-time",
-            "mute",
-            "volume",
-            "fullscreen",
-          ],
-        });
+        createPlyr(el, type);
         if (type === "audio") {
           this.setVideoPreload();
         }
-        if (type === "video") {
-          player.on("ready", () => {
-            const dur = player.duration || 1;
-            const minPct = (25 / dur) * 100;
-            const maxPct = (65 / dur) * 100;
-            const container = player.elements.container;
-            if (container) {
-              container.style.setProperty(
-                "--min-percent",
-                minPct + "%"
-              );
-              container.style.setProperty(
-                "--max-percent",
-                maxPct + "%"
-              );
-            }
-            const progress = player.elements.progress;
-            if (progress) {
-              progress.style.setProperty("--min-percent", minPct + "%");
-              progress.style.setProperty("--max-percent", maxPct + "%");
-            }
-            el.currentTime = 25;
-          });
-        }
-        window.__plyr = player;
       });
+    },
+
+    clampSeek(el) {
+      if (el.currentTime < CLIP_START || el.currentTime > CLIP_END) {
+        el.currentTime = Math.min(Math.max(el.currentTime, CLIP_START), CLIP_END);
+      }
+    },
+
+    stopAtEnd(el) {
+      if (el.currentTime >= CLIP_END) el.pause();
+    },
+
+    restartIfNearEnd(el) {
+      if (el.currentTime >= CLIP_END - 2) el.currentTime = CLIP_START;
     },
 
     setVideoPreload() {
@@ -229,15 +184,17 @@ document.addEventListener("alpine:init", () => {
       if (!videoEl || videoEl.dataset.preloadArmed) return;
       videoEl.dataset.preloadArmed = "1";
       videoEl.preload = "metadata";
-      const bufferFrom25 = () => {
-        if (videoEl.currentTime < 25) {
-          videoEl.currentTime = 25;
+      const bufferFromStart = () => {
+        if (videoEl.currentTime < CLIP_START) {
+          videoEl.currentTime = CLIP_START;
         }
       };
       if (videoEl.readyState >= 1) {
-        bufferFrom25();
+        bufferFromStart();
       } else {
-        videoEl.addEventListener("loadedmetadata", bufferFrom25, { once: true });
+        videoEl.addEventListener("loadedmetadata", bufferFromStart, {
+          once: true,
+        });
       }
     },
 
@@ -248,6 +205,22 @@ document.addEventListener("alpine:init", () => {
       this.mode = "video";
     },
 
+    openFullOpening() {
+      this.$refs.fullModal.showModal();
+      this.$nextTick(() => {
+        const video = this.$refs.fullVideo;
+        if (video) {
+          video.currentTime = 0;
+          video.play().catch(() => {});
+        }
+      });
+    },
+
+    closeFullOpening() {
+      const video = this.$refs.fullVideo;
+      if (video) video.pause();
+    },
+
     startGame() {
       this.resetMedia();
       this.loading = true;
@@ -255,16 +228,9 @@ document.addEventListener("alpine:init", () => {
       const run = (data) => {
         if (this.listMode !== "mal") this.dataset = data;
 
-        const limit = parseInt(this.difficulty);
-        this.pool = data.filter((d) => {
-          if (this.listMode !== "mal") {
-            const matchesRank = d.rank !== null && d.rank <= limit;
-            if (!matchesRank) return false;
-          }
-          if (this.selectedGenres.length > 0) {
-            return this.selectedGenres.every((g) => (d.genres || []).includes(g));
-          }
-          return true;
+        this.pool = filterPool(data, {
+          rankLimit: this.listMode === "mal" ? null : this.difficulty,
+          genres: this.selectedGenres,
         });
 
         if (this.pool.length < this.totalRounds) {
@@ -272,10 +238,7 @@ document.addEventListener("alpine:init", () => {
           this.loading = false;
           return;
         }
-        this.rounds = this.shuffle([...this.pool]).slice(
-          0,
-          this.totalRounds
-        );
+        this.rounds = shuffle([...this.pool]).slice(0, this.totalRounds);
         this.round = 1;
         this.score = 0;
         this.results = [];
@@ -285,10 +248,10 @@ document.addEventListener("alpine:init", () => {
         this.invalidGuess = false;
         this.mode = "audio";
         this.videoUnlocked = false;
-          this.current = this.rounds[0];
-          this.screen = "playing";
-          this.loading = false;
-          this.coverUrl = null;
+        this.current = this.rounds[0];
+        this.screen = "playing";
+        this.loading = false;
+        this.coverUrl = null;
       };
 
       if (this.listMode === "mal") {
@@ -309,14 +272,6 @@ document.addEventListener("alpine:init", () => {
       }
     },
 
-    shuffle(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    },
-
     filterSearch() {
       if (!this.guess.trim()) {
         this.searchResults = [];
@@ -327,13 +282,8 @@ document.addEventListener("alpine:init", () => {
         const rect = input.getBoundingClientRect();
         this.suggestAbove = window.innerHeight - rect.bottom < 200;
       }
-      const q = this.guess.toLowerCase();
       const seen = new Set();
-      this.searchResults = this.pool
-        .filter((a) => {
-          const titles = a.titles || [a.name];
-          return titles.some((t) => t.toLowerCase().includes(q));
-        })
+      this.searchResults = matchTitles(this.pool, this.guess)
         .filter((a) => {
           if (seen.has(a.name)) return false;
           seen.add(a.name);
@@ -358,7 +308,7 @@ document.addEventListener("alpine:init", () => {
       const q = text.trim().toLowerCase();
       return this.pool.some((a) => {
         const titles = a.titles || [a.name];
-        return titles.some((t) => t.toLowerCase() === q);
+        return titles.some((t) => (t || "").toLowerCase() === q);
       });
     },
 
@@ -375,14 +325,14 @@ document.addEventListener("alpine:init", () => {
         this.invalidGuess = false;
         const q = this.guess.trim().toLowerCase();
         const titles = this.current.titles || [this.current.name];
-        this.isCorrect = titles.some((t) => t.toLowerCase() === q);
+        this.isCorrect = titles.some((t) => (t || "").toLowerCase() === q);
       }
       this.answered = true;
       this.correctTitle = this.current.name;
       const points = this.isCorrect
         ? this.videoUnlocked
-          ? 500
-          : 1000
+          ? POINTS_VIDEO
+          : POINTS_AUDIO
         : 0;
       this.score += points;
       this.results.push({
@@ -392,26 +342,22 @@ document.addEventListener("alpine:init", () => {
       });
       this.searchResults = [];
       const malId = this.current.mal_id;
-      if (this.coverCache[malId]) {
-        this.coverUrl = this.coverCache[malId];
+      const cached = readCache()[malId];
+      if (cached) {
+        this.coverUrl = cached;
       } else {
         this.coverLoading = true;
-        const q = `query ($idMal: Int) { Media(idMal: $idMal, type: ANIME) { coverImage { extraLarge } } }`;
-        fetch("https://graphql.anilist.co", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({ query: q, variables: { idMal: malId } }),
-        })
-          .then((r) => r.json())
-          .then((d) => {
-            const url = d?.data?.Media?.coverImage?.extraLarge;
+        fetchCover(malId)
+          .then((url) => {
             if (url) {
-              this.coverCache[malId] = url;
+              writeEntry(malId, url);
               this.coverUrl = url;
             }
             this.coverLoading = false;
           })
-          .catch(() => { this.coverLoading = false; });
+          .catch(() => {
+            this.coverLoading = false;
+          });
       }
     },
 
@@ -436,13 +382,19 @@ document.addEventListener("alpine:init", () => {
       this.mode = "audio";
       this.videoUnlocked = false;
       this.resetMedia();
-        this.coverUrl = null;
-        this.$nextTick(() => this.initPlyr("audio"));
-      },
+      this.coverUrl = null;
+      if (this.$refs.fullModal && this.$refs.fullModal.open) {
+        this.$refs.fullModal.close();
+      }
+      this.$nextTick(() => this.initPlyr("audio"));
+    },
 
-      backToMenu() {
+    backToMenu() {
       this.resetMedia();
       this.selectedGenres = [];
+      if (this.$refs.fullModal && this.$refs.fullModal.open) {
+        this.$refs.fullModal.close();
+      }
       this.screen = "menu";
     },
   }));

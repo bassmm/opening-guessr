@@ -45,7 +45,7 @@
                 </div>
                 <p
                     class="text-base opacity-70"
-                    x-text="(isCorrect ? (videoUnlocked ? '+500' : '+1000') : '+0') + ' points'"
+                    x-text="'+' + (results.length ? results[results.length - 1].points : 0) + ' points'"
                 >
                 </p>
                 <div class="flex items-center gap-2 mt-1">

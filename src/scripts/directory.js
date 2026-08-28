@@ -1,4 +1,6 @@
 import { readCache, writeEntry } from "./cover-cache.js";
+import { fetchCovers } from "./cover-fetch.js";
+import { countGenres, filterPool, matchTitles } from "./pool-utils.js";
 
 document.addEventListener("alpine:init", () => {
     Alpine.data("directory", (initial = []) => ({
@@ -19,15 +21,7 @@ document.addEventListener("alpine:init", () => {
         init() {
             this.covers = readCache();
             this.data = initial;
-            const counts = {};
-            this.data.forEach((a) =>
-                (a.genres || []).forEach((g) => {
-                    counts[g] = (counts[g] || 0) + 1;
-                })
-            );
-            this.genres = Object.entries(counts)
-                .sort((a, b) => b[1] - a[1])
-                .map(([name, count]) => ({ name, count }));
+            this.genres = countGenres(this.data);
             this.recomputePageVisible();
             this.fetchCovers(this.paged);
 
@@ -60,38 +54,21 @@ document.addEventListener("alpine:init", () => {
             this.refreshCovers();
         },
 
-        fetchCovers(items) {
+        async fetchCovers(items) {
             const missing = items.filter((a) => !(a.mal_id in this.covers));
             if (missing.length === 0) return;
-            const fields = missing
-                .map(
-                    (a) =>
-                        `m${a.mal_id}: Media(idMal: ${a.mal_id}, type: ANIME) { coverImage { extraLarge } }`
-                )
-                .join("\n");
-            const query = `query { ${fields} }`;
-            fetch("https://graphql.anilist.co", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-                body: JSON.stringify({ query }),
-            })
-                .then((r) => r.json())
-                .then((d) => {
-                    if (!d || !d.data) return;
-                    missing.forEach((a) => {
-                        const node = d.data["m" + a.mal_id];
-                        const url =
-                            node && node.coverImage && node.coverImage.extraLarge;
-                        if (url) {
-                            this.covers[a.mal_id] = url;
-                            writeEntry(a.mal_id, url);
-                        }
-                    });
-                })
-                .catch(() => {});
+            try {
+                const covers = await fetchCovers(
+                    missing.map((a) => a.mal_id)
+                );
+                missing.forEach((a) => {
+                    const url = covers[a.mal_id];
+                    if (url) {
+                        this.covers[a.mal_id] = url;
+                        writeEntry(a.mal_id, url);
+                    }
+                });
+            } catch {}
         },
 
         refreshCovers() {
@@ -124,21 +101,12 @@ document.addEventListener("alpine:init", () => {
 
         get filtered() {
             let list = this.data;
-            const q = this.query.trim().toLowerCase();
+            const q = this.query.trim();
             if (q) {
-                list = list.filter((a) => {
-                    const titles = a.titles || [a.name];
-                    return titles.some((t) =>
-                        (t || "").toLowerCase().includes(q)
-                    );
-                });
+                list = matchTitles(list, q);
             }
             if (this.selectedGenres.length > 0) {
-                list = list.filter((a) =>
-                    this.selectedGenres.every((g) =>
-                        (a.genres || []).includes(g)
-                    )
-                );
+                list = filterPool(list, { genres: this.selectedGenres });
             }
             const sort = this.sortBy;
             return [...list].sort((a, b) => {

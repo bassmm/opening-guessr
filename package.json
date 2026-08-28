@@ -7,6 +7,7 @@
   },
   "scripts": {
     "prebuild": "node src/data/fetch-openings.mjs",
+    "predev": "node src/data/ensure-openings.mjs",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
