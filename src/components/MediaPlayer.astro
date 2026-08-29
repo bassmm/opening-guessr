@@ -5,14 +5,16 @@
 </div>
 
 <div class="w-full">
-    <audio
-        x-show="mode === 'audio'"
-        :src="current?.audio"
-        x-ref="audioPlayer"
-        controls
-        class="w-full"
-        x-init="initPlyr('audio')"></audio>
-    <div x-show="mode === 'video'" class="relative">
+    <div class="rounded-box overflow-hidden">
+        <audio
+            x-show="mode === 'audio'"
+            :src="current?.audio"
+            x-ref="audioPlayer"
+            controls
+            class="w-full rounded-box overflow-hidden"
+            x-init="initPlyr('audio')"></audio>
+    </div>
+    <div x-show="mode === 'video'" class="relative rounded-box overflow-hidden">
         <video
             :src="current?.video"
             x-ref="videoPlayer"
@@ -41,24 +43,3 @@
         </button>
     </div>
 </div>
-
-<dialog class="modal bg-none" x-ref="fullModal" @close="closeFullOpening()">
-    <div class="modal-box max-w-4xl bg-none">
-        <form method="dialog">
-            <button
-                class="btn btn-md btn-circle btn-soft btn-primary absolute right-2 top-2"
-                >✕</button
-            >
-        </form>
-        <video
-            x-ref="fullVideo"
-            :src="current?.video"
-            controls
-            playsinline
-            preload="none"
-            class="w-full rounded-box"></video>
-    </div>
-    <form method="dialog" class="modal-backdrop bg-none">
-        <button>close</button>
-    </form>
-</dialog>

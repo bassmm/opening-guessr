@@ -127,6 +127,25 @@ const roundedHalf =
                                     >
                                     <span class="link link-hover">AniList</span>
                                 </a>
+                                <a
+                                    href={`https://animethemes.moe/anime/${anime.slug}`}
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="badge badge-sm bg-[#f5f2fa] link link-hover gap-2 border-transparent text-[#1c1823]"
+                                    ><svg
+                                        fill="currentColor"
+                                        viewBox="0 0 160 86.6"
+                                        class="h-3.5 w-3.5"
+                                        ><polygon
+                                            points="56.25 32.48 56.25 75.78 75 86.6 75 0 0 43.3 18.75 54.13 56.25 32.48"
+                                        ></polygon><polygon
+                                            points="103.75 32.48 141.25 54.13 160 43.3 85 0 85 86.6 103.75 75.78 103.75 32.48"
+                                        ></polygon></svg
+                                    >
+                                    <span class="link link-hover"
+                                        >AnimeThemes</span
+                                    >
+                                </a>
                             </div>
 
                             <div
@@ -184,34 +203,34 @@ const roundedHalf =
                         </div>
                     </div>
 
-                    <div class="flex flex-col gap-1 border border-neutral">
+                    <div class="flex flex-col gap-1">
                         {
                             anime.song?.title ? (
-                                <div class="text-lg mt-2">
-                                    <i class="text-2xl align-middle ml-3 ph ph-cassette-tape" />{" "}
-                                    <span class="font-semibold">
-                                        {anime.song.title}
-                                    </span>
+                                <div class="flex flex-col">
                                     {anime.song.artist ? (
-                                        <span class="opacity-75 text-sm">
-                                            {" - "}
+                                        <span class="opacity-75 text-xs ml-7">
                                             {anime.song.artist}
                                         </span>
                                     ) : null}
+                                    <div class="flex flex-row gap-1">
+                                        <i class="text-2xl align-middle ph ph-cassette-tape" />{" "}
+                                        <span class="font-semibold">
+                                            {anime.song.title}
+                                        </span>
+                                    </div>
                                 </div>
                             ) : null
                         }
 
                         {
                             anime.video ? (
-                                <div class="w-full">
+                                <div class="w-full border rounded-box overflow-hidden">
                                     <video
                                         id="anime-video"
                                         src={anime.video}
                                         poster={cachedCover ?? undefined}
                                         preload="metadata"
                                         controls
-                                        playsinline
                                         class="w-full"
                                     />
                                 </div>
