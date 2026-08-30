@@ -16,7 +16,6 @@ const displayName = anime.name_english || anime.name;
 const yearLabel = anime.year ? String(anime.year) : null;
 const title = `${displayName} | Opening Guessr`;
 const description = `Guess ${displayName}${yearLabel ? ` (${yearLabel})` : ""} from its opening theme${anime.song?.title ? ` — ${anime.song.title} by ${anime.song.artist || "unknown artist"}` : ""}. Test your anime knowledge with Opening Guessr.`;
-const ogImage = new URL(`/open-graph/anime/${anime.slug}.png`, Astro.site).href;
 const cachedCover = readCache()[anime.mal_id] ?? null;
 
 const starSteps = [];
@@ -31,7 +30,7 @@ const roundedHalf =
     anime.score != null ? Math.round((anime.score / 2) * 2) / 2 : null;
 ---
 
-<Layout title={title} description={description} ogImage={ogImage}>
+<Layout title={title} description={description}>
     <div class="min-h-screen bg-base-200">
         <div class="navbar bg-base-100 shadow-sm px-4 sm:px-6 py-3 min-h-16">
             <div class="navbar-start">

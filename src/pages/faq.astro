@@ -1,0 +1,84 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const title = "FAQ - Opening Guessr";
+const description =
+    "How scoring, clue modes, clips, data sources, and MyAnimeList lists work in Opening Guessr — answered from how the game is built.";
+
+const faqs = [
+    {
+        q: "How does scoring work?",
+        a: `<p>Each round is worth a flat number of points for a correct answer. A correct <span class="font-medium">Audio</span> answer is <span class="font-medium">1000 points</span>; a correct <span class="font-medium">Video Clue</span> answer is <span class="font-medium">500 points</span>. Wrong answers score 0. There's no speed or streak bonus, so video mode literally halves your maximum score for that round. Your best total across a 5-round game is saved as your high score in your browser.</p>`,
+    },
+    {
+        q: "What do I actually guess — the anime, the song, or the artist?",
+        a: `<p>You guess the <span class="font-medium">anime</span>. Type the anime's name — any of its English, romaji, or alternative titles will match — and the game checks it against the title list. The opening's song title and artist are shown <span class="font-medium">after</span> you answer, but you're only scored on naming the anime.</p>`,
+    },
+    {
+        q: "What's the difference between Audio and Video Clue mode?",
+        a: `<p>Audio mode just plays the sound. Unlocking the Video Clue reveals a blurred video of the opening to help you — but because it's a hint, a correct video answer is worth 500 instead of 1000. You can also open the full opening at any time to watch it unblurred.</p>`,
+    },
+    {
+        q: "How long is the clip?",
+        a: `<p>Each round plays a 40-second slice of the opening, from about 25 seconds in to 65 seconds in. You can't skip around within the clip.</p>`,
+    },
+    {
+        q: "Where do the openings and anime data come from?",
+        a: `<p>The anime list, popularity ranks, scores, years, and genres are pulled from the Tenrai API (the top ~2500 most popular SFW anime). The opening videos, audio, and song info come from the <a href="https://animethemes.moe" target="_blank" rel="noopener" class="link link-hover">AnimeThemes API</a>. The "My MAL List" mode uses the MyAnimeList API for your personal list.</p>`,
+    },
+    {
+        q: "Can I play openings from anime I actually watch, not just popular ones?",
+        a: `<p>Yes — choose <span class="font-medium">My MAL List</span> on the menu, enter your MyAnimeList username, and Opening Guessr builds a playable pool from the openings in your list. The resolved pool is cached in your browser for 24 hours.</p>`,
+    },
+    {
+        q: "An opening won't play, is blocked, or the video is missing.",
+        a: `<p>Not every anime has an opening available on AnimeThemes, and some clips may be region-blocked or fail to load. The dataset is built to skip anime without a usable opening, so you shouldn't normally be served a broken one — but if a clip fails, refresh or skip the round. Report persistent issues by email or on Discord.</p>`,
+    },
+    {
+        q: "How do I request an anime or report a wrong title?",
+        a: `<p>The base pool is the top 2500 popular anime and refreshes from the data source; use <span class="font-medium">My MAL List</span> to play niche titles from your own library. For missing or incorrect entries, email or ping us on Discord.</p>`,
+    },
+    {
+        q: "Why are there ads, and how can I support the project?",
+        a: `<p>Opening Guessr is free to play. Ads help cover hosting costs. If you'd like to support development, you can <a href="https://www.buymeacoffee.com/bassmm" target="_blank" rel="noopener" class="link link-hover">buy me a coffee</a> — never required, always appreciated.</p>`,
+    },
+];
+---
+
+<Layout title={title} description={description}>
+    <div class="min-h-screen bg-base-200">
+        <div class="navbar bg-base-100 shadow-sm px-4 sm:px-6 py-3 min-h-16">
+            <div class="navbar-start">
+                <a href="/" class="btn btn-ghost btn-sm">
+                    <i class="ph ph-arrow-circle-left text-3xl"></i>
+                    <span class="hidden sm:inline">Back to game</span>
+                </a>
+            </div>
+            <div class="navbar-center">
+                <span
+                    class="text-3xl sm:text-4xl font-bold text-shadow-primary text-shadow-xs"
+                    >Opening Guessr</span
+                >
+            </div>
+            <div class="navbar-end"></div>
+        </div>
+
+        <main class="max-w-3xl mx-auto px-6 sm:px-8 py-10">
+            <h1 class="text-4xl font-bold mb-6">Frequently Asked Questions</h1>
+
+            <div class="join join-vertical w-full gap-4">
+                {
+                    faqs.map((f) => (
+                        <div class="collapse collapse-arrow bg-base-100">
+                            <input type="radio" name="faq" />
+                            <div class="collapse-title text-lg font-medium">
+                                {f.q}
+                            </div>
+                            <div class="collapse-content" set:html={f.a} />
+                        </div>
+                    ))
+                }
+            </div>
+        </main>
+    </div>
+</Layout>

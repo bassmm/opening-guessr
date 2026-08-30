@@ -1,7 +1,7 @@
 <div>
     <div class="hero min-h-screen bg-base-200 pt-16">
         <div class="hero-content text-center">
-            <div class="max-w-2xl w-full">
+            <div class="max-w-2xl w-full min-w-0">
                 <div class="mb-12">
                     <h1
                         class="text-7xl font-bold text-shadow-primary text-shadow-sm text-shadow"
@@ -18,6 +18,14 @@
                         <button
                             role="tab"
                             class="tab flex-1"
+                            :class="{ 'tab-active': listMode === 'difficulty' }"
+                            @click="setListMode('difficulty')"
+                        >
+                            Difficulty
+                        </button>
+                        <button
+                            role="tab"
+                            class="tab flex-1"
                             :class="{ 'tab-active': listMode === 'popular' }"
                             @click="setListMode('popular')"
                         >
@@ -31,6 +39,34 @@
                         >
                             My MAL List
                         </button>
+                    </div>
+
+                    <!-- Difficulty Selector -->
+                    <div class="join w-full" x-show="listMode === 'difficulty'">
+                        <input
+                            class="join-item btn btn-md btn-soft flex-1"
+                            type="radio"
+                            name="difficulty"
+                            aria-label="Easy"
+                            value="easy"
+                            x-model="difficultyLevel"
+                        />
+                        <input
+                            class="join-item btn btn-md btn-soft flex-1"
+                            type="radio"
+                            name="difficulty"
+                            aria-label="Medium"
+                            value="medium"
+                            x-model="difficultyLevel"
+                        />
+                        <input
+                            class="join-item btn btn-md btn-soft flex-1"
+                            type="radio"
+                            name="difficulty"
+                            aria-label="Hard"
+                            value="hard"
+                            x-model="difficultyLevel"
+                        />
                     </div>
 
                     <select
@@ -103,9 +139,9 @@
 
                     <!-- Optional Genre Filter Multi-Select Collapse -->
                     <details
-                        class="collapse collapse-arrow border border-base-content/20 bg-base-100 rounded-box text-left"
+                        class="collapse collapse-arrow border border-base-content/20 bg-base-100 rounded-box text-left w-full max-w-full overflow-hidden"
                     >
-                        <summary class="collapse-title text-lg font-medium">
+                        <summary class="collapse-title">
                             Filter by Genre (Optional)
                             <template x-if="selectedGenres.length > 0">
                                 <span
@@ -114,7 +150,7 @@
                             </template>
                         </summary>
                         <div
-                            class="collapse-content flex flex-wrap gap-2 pt-2 justify-start max-h-60 overflow-y-auto"
+                            class="collapse-content flex flex-wrap gap-2 pt-2 justify-start max-h-60 overflow-y-auto overflow-x-hidden"
                         >
                             <template x-for="g in activeGenres" :key="g.name">
                                 <button
@@ -161,6 +197,11 @@
                             Not enough anime match your criteria (need at least
                             5). Try broadening your rank or genre filters.
                         </span>
+                        <span x-show="listMode === 'difficulty'">
+                            Not enough anime match your criteria (need at least
+                            5). Try a different difficulty or removing genre
+                            filters.
+                        </span>
                         <span x-show="listMode === 'mal'">
                             Not enough anime match your criteria (need at least
                             5). Try removing genre filters.
@@ -182,24 +223,4 @@
             </div>
         </div>
     </div>
-
-    <section class="bg-base-200 px-4 py-16 sm:px-8">
-        <div
-            class="prose prose-lg mx-auto border-l-2 border-primary px-4 max-w-3xl text-left"
-        >
-            <h2 class="text-2xl font-bold py-4">Anime Opening Quiz</h2>
-            <p class="opacity-60 pb-8">
-                Opening Guessr is a free anime opening guessing game. Listen to
-                a theme song, identify the anime, and test your knowledge of
-                popular anime openings.
-            </p>
-            <h2 class="text-2xl font-bold py-4">How to Play</h2>
-            <p class="opacity-60 pb-4">
-                Choose an anime pool, optionally filter it by genre, and play
-                five rounds. Start with audio for the highest score, or unlock a
-                blurred video clue when you need help guessing the anime
-                opening.
-            </p>
-        </div>
-    </section>
 </div>

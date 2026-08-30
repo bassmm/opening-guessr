@@ -11,6 +11,7 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("game", () => ({
     screen: "menu",
     difficulty: 50,
+    difficultyLevel: "easy",
     pointsAudio: POINTS_AUDIO,
     pointsVideo: POINTS_VIDEO,
     selectedGenres: [],
@@ -35,8 +36,9 @@ document.addEventListener("alpine:init", () => {
     invalidGuess: false,
     coverUrl: null,
     coverLoading: false,
+    fullOpening: false,
     suggestAbove: false,
-    listMode: "popular",
+    listMode: "difficulty",
     malUsername: "",
     malPool: [],
     malGenres: [],
@@ -57,21 +59,37 @@ document.addEventListener("alpine:init", () => {
         .catch(() => {});
       this.$watch("mode", (val, old) => {
         if (val === old) return;
+        if (this.fullOpening) return;
         this.$nextTick(() => this.initPlyr(val === "audio" ? "audio" : "video"));
       });
       this.$watch("$store.theme.current", (val, old) => {
         if (val === old) return;
+        if (this.fullOpening) return;
         if (this.screen === "playing" && window.__plyr) {
           this.$nextTick(() => this.initPlyr(this.mode));
         }
       });
     },
 
+    get rankBounds() {
+      if (this.listMode === "mal") return { rankMin: null, rankMax: null };
+      if (this.listMode === "difficulty") {
+        return {
+          easy: { rankMin: 1, rankMax: 250 },
+          medium: { rankMin: 251, rankMax: 1250 },
+          hard: { rankMin: 1251, rankMax: null },
+        }[this.difficultyLevel];
+      }
+      return { rankMin: null, rankMax: this.difficulty };
+    },
+
     get filteredPoolCount() {
       const source = this.listMode === "mal" ? this.malPool : this.dataset;
       if (!source || !source.length) return 0;
+      const { rankMin, rankMax } = this.rankBounds;
       return filterPool(source, {
-        rankLimit: this.listMode === "mal" ? null : this.difficulty,
+        rankMin,
+        rankMax,
         genres: this.selectedGenres,
       }).length;
     },
@@ -152,13 +170,18 @@ document.addEventListener("alpine:init", () => {
     },
 
     initPlyr(type) {
-      if (type === "video" && this.mode !== "video") return;
-      if (type === "audio" && this.mode !== "audio") return;
+      if (type === "audio") {
+        if (this.mode !== "audio") return;
+        if (this.fullOpening) return;
+      }
+      if (type === "video") {
+        if (this.mode !== "video" && !this.fullOpening) return;
+      }
       const key = type === "audio" ? "audioPlayer" : "videoPlayer";
       this.$nextTick(() => {
         const el = this.$refs[key];
         if (!el) return;
-        createPlyr(el, type);
+        createPlyr(el, type, { clip: !this.fullOpening });
         if (type === "audio") {
           this.setVideoPreload();
         }
@@ -166,16 +189,19 @@ document.addEventListener("alpine:init", () => {
     },
 
     clampSeek(el) {
+      if (this.fullOpening) return;
       if (el.currentTime < CLIP_START || el.currentTime > CLIP_END) {
         el.currentTime = Math.min(Math.max(el.currentTime, CLIP_START), CLIP_END);
       }
     },
 
     stopAtEnd(el) {
+      if (this.fullOpening) return;
       if (el.currentTime >= CLIP_END) el.pause();
     },
 
     restartIfNearEnd(el) {
+      if (this.fullOpening) return;
       if (el.currentTime >= CLIP_END - 2) el.currentTime = CLIP_START;
     },
 
@@ -206,19 +232,14 @@ document.addEventListener("alpine:init", () => {
     },
 
     openFullOpening() {
-      this.$refs.fullModal.showModal();
+      this.fullOpening = true;
       this.$nextTick(() => {
-        const video = this.$refs.fullVideo;
-        if (video) {
-          video.currentTime = 0;
-          video.play().catch(() => {});
-        }
+        const video = this.$refs.videoPlayer;
+        if (!video) return;
+        createPlyr(video, "video", { clip: false });
+        video.currentTime = 0;
+        video.play().catch(() => {});
       });
-    },
-
-    closeFullOpening() {
-      const video = this.$refs.fullVideo;
-      if (video) video.pause();
     },
 
     startGame() {
@@ -228,8 +249,10 @@ document.addEventListener("alpine:init", () => {
       const run = (data) => {
         if (this.listMode !== "mal") this.dataset = data;
 
+        const { rankMin, rankMax } = this.rankBounds;
         this.pool = filterPool(data, {
-          rankLimit: this.listMode === "mal" ? null : this.difficulty,
+          rankMin,
+          rankMax,
           genres: this.selectedGenres,
         });
 
@@ -383,18 +406,14 @@ document.addEventListener("alpine:init", () => {
       this.videoUnlocked = false;
       this.resetMedia();
       this.coverUrl = null;
-      if (this.$refs.fullModal && this.$refs.fullModal.open) {
-        this.$refs.fullModal.close();
-      }
+      this.fullOpening = false;
       this.$nextTick(() => this.initPlyr("audio"));
     },
 
     backToMenu() {
       this.resetMedia();
       this.selectedGenres = [];
-      if (this.$refs.fullModal && this.$refs.fullModal.open) {
-        this.$refs.fullModal.close();
-      }
+      this.fullOpening = false;
       this.screen = "menu";
     },
   }));

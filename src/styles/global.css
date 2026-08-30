@@ -17,6 +17,7 @@ html {
 .plyr {
   --plyr-color-main: var(--color-primary);
   --plyr-video-background: var(--color-base-100);
+  border-radius: var(--radius-box);
 }
 
 .plyr.plyr--audio {

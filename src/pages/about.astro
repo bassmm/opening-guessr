@@ -1,0 +1,147 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const title = "About - Opening Guessr";
+const description =
+    "Opening Guessr is a free anime opening quiz. Listen to opening themes, guess the anime, and play openings from your own MyAnimeList.";
+---
+
+<Layout title={title} description={description}>
+    <div class="min-h-screen bg-base-200">
+        <div class="navbar bg-base-100 shadow-sm px-4 sm:px-6 py-3 min-h-16">
+            <div class="navbar-start">
+                <a href="/" class="btn btn-ghost btn-sm">
+                    <i class="ph ph-arrow-circle-left text-3xl"></i>
+                    <span class="hidden sm:inline">Back to game</span>
+                </a>
+            </div>
+            <div class="navbar-center">
+                <span
+                    class="text-3xl sm:text-4xl font-bold text-shadow-primary text-shadow-xs"
+                    >Opening Guessr</span
+                >
+            </div>
+            <div class="navbar-end"></div>
+        </div>
+
+        <main class="max-w-3xl mx-auto px-6 sm:px-8 py-10">
+            <h1 class="text-4xl font-bold mb-4">
+                About <span class="text-shadow-xs text-shadow-primary"
+                    >Opening Guessr</span
+                >
+            </h1>
+            <div class="space-y-6 text-base opacity-90">
+                <p>
+                    Opening Guessr is a free anime opening quiz. You hear an
+                    anime's opening theme and have to name the anime it's from.
+                    It's a project that started for fun to be played on call on
+                    discord by me and a few friends. We loved playing <a
+                        href="https://aniguessr.com"
+                        target="_blank"
+                        class="link">Aniguessr</a
+                    >'s guess the opening game but the hard difficulty animes
+                    were just always too hard and we'd have to keep moving to
+                    the next day to keep playing for extended sessions. We also
+                    wanted an intergration with our MAL lists so we can guess
+                    opening from animes we know we've seen. So Opening Guessr
+                    was born.
+                </p>
+
+                <div>
+                    <h2 class="text-2xl font-semibold mb-3">How to play</h2>
+                    <ul class="list-disc list-inside space-y-1.5">
+                        <li>
+                            Pick a pool of anime to draw openings from: by
+                            <span class="font-medium"> Difficulty</span> (Easy / Medium
+                            / Hard, based on Aniguessr's difficulties so can be used
+                            for practice lol), by
+                            <span class="font-medium"> Popularity</span> (Top 50 to
+                            Top 2500), or load your own
+                            <span class="font-medium"> My MAL List</span>.
+                        </li>
+                        <li>
+                            Optionally narrow the pool down with a genre filter.
+                        </li>
+                        <li>
+                            Play 5 rounds. Each round plays a 40-second clip of
+                            an opening (from about 25s to 65s in). Type the
+                            anime's name — autocomplete suggests matches as you
+                            type. Press <kbd class="kbd kbd-sm"> Enter</kbd> to submit
+                            (<kbd class="kbd kbd-sm">Esc</kbd> closes the suggestions).
+                        </li>
+                        <li>
+                            Get it right to score points, then move on to the
+                            next round. Your best 5-round total is saved as your
+                            high score in your browser.
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h2 class="text-2xl font-semibold mb-3">
+                        Audio vs. Video Clue
+                    </h2>
+                    <p>
+                        You start in Audio mode. If you're stuck, unlock the
+                        Video Clue to reveal a blurred video of the opening —
+                        but because it's a hint, a correct video-clue answer is
+                        worth
+                        <span class="font-medium"> 500 points</span> instead of the
+                        <span class="font-medium"> 1000 points</span> an audio answer
+                        earns. You can also open the full opening at any time to watch
+                        it unblurred.
+                    </p>
+                </div>
+
+                <div>
+                    <h2 class="text-2xl font-semibold mb-3">
+                        Where the data comes from
+                    </h2>
+                    <p>
+                        The anime list, popularity ranks, scores, years, and
+                        genres are pulled from the Tenrai API (the top ~2500
+                        most popular anime). The opening videos, audio, and song
+                        titles/artists come from the{" "}
+                        <a
+                            href="https://animethemes.moe"
+                            target="_blank"
+                            rel="noopener"
+                            class="link"
+                        >
+                            AnimeThemes API</a
+                        >. The "My MAL List" mode fetches your own list through
+                        the MyAnimeList API. All opening media is used for
+                        identification and quiz purposes.
+                    </p>
+                </div>
+
+                <div>
+                    <h2 class="text-2xl font-semibold mb-3">Get in touch</h2>
+                    <p>
+                        Found a broken clip, a wrong title, or just want to say
+                        hi? Reach out at{" "}
+                        <a href="mailto:bassmmm@proton.me" class="link">
+                            bassmmm@proton.me</a
+                        > or find me on{" "}
+                        <a
+                            href="https://x.com/bassmmdotdev"
+                            target="_blank"
+                            rel="noopener"
+                            class="link"
+                        >
+                            X</a
+                        > and the{" "}
+                        <a
+                            href="https://discord.gg/ut7qEW9aXq"
+                            target="_blank"
+                            rel="noopener"
+                            class="link"
+                        >
+                            Discord</a
+                        >.
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+</Layout>

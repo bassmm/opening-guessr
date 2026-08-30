@@ -91,3 +91,8 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 - Design UI using only Daisy UI conponents (use context7 to look up components) as much as possible, avoid writing tailwind classes if a DaisyUI component exists that can be used.
 - Prioritise using exclusively alpine for interactivity. Avoid utilising custom javascript scripts as much as possible.
+
+
+# Graphify
+
+Use graphify to look up info about the repo pls.

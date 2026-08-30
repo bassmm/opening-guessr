@@ -12,9 +12,18 @@ export function countGenres(list) {
     .map(([name, count]) => ({ name, count }));
 }
 
-export function filterPool(source, { rankLimit = null, genres = [] } = {}) {
+export function filterPool(
+  source,
+  { rankLimit = null, rankMin = null, rankMax = null, genres = [] } = {}
+) {
   return source.filter((d) => {
     if (rankLimit !== null && (d.rank === null || d.rank > rankLimit)) {
+      return false;
+    }
+    if (rankMax !== null && (d.rank === null || d.rank > rankMax)) {
+      return false;
+    }
+    if (rankMin !== null && (d.rank === null || d.rank < rankMin)) {
       return false;
     }
     if (genres.length > 0) {

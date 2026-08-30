@@ -101,11 +101,10 @@ const ogImageUrl = ogImage ?? new URL("/opengraph.png", Astro.site).href;
             defer
             src="https://cloud.umami.is/script.js"
             data-website-id="18246006-a86a-4aae-aa82-d2bf24d8e501"></script>
-            <script
-                async
-                src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4299046309223342"
-                crossorigin="anonymous"></script>
-
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4299046309223342"
+            crossorigin="anonymous"></script>
     </head>
     <body class="relative min-h-screen bg-base-200 text-base-content">
         <div
@@ -148,13 +147,82 @@ const ogImageUrl = ogImage ?? new URL("/opengraph.png", Astro.site).href;
                         <button
                             class="justify-start text-left"
                             @click="$store.theme.set(theme); open = false"
-                            x-text="theme"
-                        ></button>
+                            x-text="theme"></button>
                     </li>
                 </template>
             </ul>
         </div>
+
         <slot />
+
+        <footer
+            class="footer footer-horizontal footer-center bg-base-200 text-base-content rounded relative overflow-hidden p-10"
+        >
+            <div
+                class="pointer-events-none select-none absolute inset-x-0 bottom-0 z-0 flex justify-center translate-y-5"
+                aria-hidden="true"
+            >
+                <div
+                    class="relative [-webkit-mask-image:linear-gradient(to_bottom,black_25%,transparent_80%)] [mask-image:linear-gradient(to_bottom,black_25%,transparent_80%)]"
+                >
+                    <span
+                        class="font-bold text-shadow-primary text-shadow-sm text-shadow whitespace-nowrap leading-none text-[12vw] opacity-20 block"
+                    >
+                        Opening Guessr
+                    </span>
+                    <span
+                        class="absolute inset-0 font-bold text-shadow-primary text-shadow-sm text-shadow whitespace-nowrap leading-none text-[12vw] opacity-20 block blur-3xl mask-[linear-gradient(to_bottom,transparent_45%,black_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_45%,black_100%)]"
+                    >
+                        Opening Guessr
+                    </span>
+                </div>
+            </div>
+            <nav class="grid grid-flow-col gap-4 relative z-10">
+                <a href="/about" class="link link-hover">About</a>
+                <a href="/faq" class="link link-hover">FAQ</a>
+                <a
+                    href="mailto:bassmmm@proton.me"
+                    target="_blank"
+                    class="link link-hover">Say Hi!</a
+                >
+                <a
+                    href="https://www.buymeacoffee.com/bassmm"
+                    target="_blank"
+                    class="link link-hover">Support Me :)</a
+                >
+            </nav>
+            <nav class="relative z-10">
+                <div class="grid grid-flow-col gap-4">
+                    <a
+                        href="https://x.com/bassmmdotdev"
+                        target="_blank"
+                        class="hover:brightness-200"
+                    >
+                        <i class="ph ph-x-logo text-2xl"></i>
+                    </a>
+                    <a
+                        href="https://discord.gg/ut7qEW9aXq"
+                        target="_blank"
+                        class="hover:brightness-200"
+                    >
+                        <i class="ph ph-discord-logo text-2xl"></i>
+                    </a>
+                    <a
+                        href="https://www.buymeacoffee.com/bassmm"
+                        target="_blank"
+                        class="hover:brightness-200"
+                    >
+                        <i class="ph ph-coffee text-2xl"></i>
+                    </a>
+                </div>
+            </nav>
+            <aside class="relative z-10">
+                <p>
+                    ©
+                    <a href="https://bassmm.dev"> bassmm.dev</a>
+                </p>
+            </aside>
+        </footer>
     </body>
 </html>
 

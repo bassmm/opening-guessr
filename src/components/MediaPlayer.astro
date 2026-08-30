@@ -5,16 +5,19 @@
 </div>
 
 <div class="w-full">
-    <div class="rounded-box overflow-hidden">
+    <div class="rounded-box">
         <audio
-            x-show="mode === 'audio'"
+            x-show="mode === 'audio' && !fullOpening"
             :src="current?.audio"
             x-ref="audioPlayer"
             controls
-            class="w-full rounded-box overflow-hidden"
+            class="w-full"
             x-init="initPlyr('audio')"></audio>
     </div>
-    <div x-show="mode === 'video'" class="relative rounded-box overflow-hidden">
+    <div
+        x-show="mode === 'video' || fullOpening"
+        class="relative rounded-box"
+    >
         <video
             :src="current?.video"
             x-ref="videoPlayer"
@@ -23,16 +26,19 @@
             playsinline
             disablepictureinpicture
             class="w-full"
-            :class="{ 'blur-[9px]': !answered }"
+            :class="{ 'blur-[9px]': !answered && !fullOpening }"
             x-init="initPlyr('video')"
             @seeking="clampSeek($el)"
             @timeupdate="stopAtEnd($el)"
             @play="restartIfNearEnd($el)"></video>
     </div>
-    <p class="text-base opacity-50 text-center mt-2" x-show="mode === 'video'">
+    <p
+        class="text-base opacity-50 text-center mt-2"
+        x-show="mode === 'video' && !fullOpening"
+    >
         Video starts at 25s and stops at 65s
     </p>
-    <div class="flex justify-center mt-3" x-show="answered">
+    <div class="flex justify-center mt-3" x-show="answered && !fullOpening">
         <button
             class="btn btn-outline btn-sm"
             type="button"
