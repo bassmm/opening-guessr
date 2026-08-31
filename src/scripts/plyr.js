@@ -1,5 +1,24 @@
 // Shared Plyr player setup for the game and the anime detail page.
-import Plyr from "plyr";
+// Plyr and its CSS are loaded lazily so they never block initial page load.
+// The CSS is injected via a ?url import because Astro hoists regular CSS
+// imports (even dynamic ones) into a render-blocking <link> in the page head.
+import plyrCssUrl from "plyr/dist/plyr.css?url";
+
+let plyrCssLoaded = false;
+
+function loadPlyrCss() {
+  if (plyrCssLoaded) return;
+  plyrCssLoaded = true;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = plyrCssUrl;
+  document.head.appendChild(link);
+}
+
+export function preloadPlyr() {
+  import("plyr");
+  loadPlyrCss();
+}
 
 export const CLIP_START = 25;
 export const CLIP_END = 65;
@@ -11,7 +30,9 @@ function detectTheme() {
   return cs === "dark" ? "dark" : "light";
 }
 
-export function initPlyr(el, type, { clip = true } = {}) {
+export async function initPlyr(el, type, { clip = true } = {}) {
+  loadPlyrCss();
+  const { default: Plyr } = await import("plyr");
   if (window.__plyr) {
     window.__plyr.destroy();
     window.__plyr = null;
