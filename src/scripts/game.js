@@ -2,7 +2,7 @@ import { loadMalPool } from "./mal-pool.js";
 import { readCache, writeEntry } from "./cover-cache.js";
 import { fetchCover } from "./cover-fetch.js";
 import { countGenres, filterPool, matchTitles, shuffle } from "./pool-utils.js";
-import { initPlyr as createPlyr, CLIP_START, CLIP_END } from "./plyr.js";
+import { initPlyr as createPlyr, preloadPlyr, CLIP_START, CLIP_END } from "./plyr.js";
 
 const POINTS_AUDIO = 1000;
 const POINTS_VIDEO = 500;
@@ -243,6 +243,7 @@ document.addEventListener("alpine:init", () => {
     },
 
     startGame() {
+      preloadPlyr();
       this.resetMedia();
       this.loading = true;
 

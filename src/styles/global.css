@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist+Pixel&family=Pixelify+Sans:wght@400..700&display=swap');
+@import "@fontsource/geist-pixel";
 @import "@phosphor-icons/web/regular";
 @import "tailwindcss";
 @plugin "daisyui" {
