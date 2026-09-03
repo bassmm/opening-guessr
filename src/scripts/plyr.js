@@ -7,12 +7,15 @@ import plyrCssUrl from "plyr/dist/plyr.css?url";
 let plyrCssLoaded = false;
 
 function loadPlyrCss() {
-  if (plyrCssLoaded) return;
+  if (plyrCssLoaded) return Promise.resolve();
   plyrCssLoaded = true;
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = plyrCssUrl;
-  document.head.appendChild(link);
+  return new Promise((resolve) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = plyrCssUrl;
+    link.onload = resolve;
+    document.head.appendChild(link);
+  });
 }
 
 export function preloadPlyr() {
@@ -31,8 +34,9 @@ function detectTheme() {
 }
 
 export async function initPlyr(el, type, { clip = true } = {}) {
-  loadPlyrCss();
-  const { default: Plyr } = await import("plyr");
+  el.style.opacity = "0";
+  const [, { default: Plyr }] = await Promise.all([loadPlyrCss(), import("plyr")]);
+  el.style.opacity = "";
   if (window.__plyr) {
     window.__plyr.destroy();
     window.__plyr = null;

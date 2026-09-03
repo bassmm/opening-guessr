@@ -2,7 +2,10 @@
 @import "@phosphor-icons/web/regular";
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: all;
+  themes: light, dark, cupcake, bumblebee, emerald, synthwave, retro,
+    cyberpunk, valentine, halloween, garden, forest, lofi, wireframe,
+    black, dracula --prefersdark, cmyk, autumn, lemonade, night, coffee, dim, nord --default,
+    sunset
 }
 
 html {

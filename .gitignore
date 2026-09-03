@@ -38,3 +38,6 @@ public/data/openings.json
 
 # deno lockfile (not a deno project)
 deno.lock
+
+#playwright output
+.playwright-cli
