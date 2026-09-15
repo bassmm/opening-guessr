@@ -1,99 +1,64 @@
-# Opening Guessr <a href="https://opguessr.netlify.app"><img src="public/favicon.svg" width="48" align="right"/></a>
+# Opening Guessr
 
-An anime opening guessing game — listen to a theme song, name the anime.
+An anime opening theme guessing game — listen to opening audio or 40s blurred clip, name the anime.
 
-Built with [Astro](https://astro.build), [AlpineJS](https://alpinejs.dev), [daisyUI](https://daisyui.com), and [Plyr](https://plyr.io).
+**[Play now → opguessr.com](https://opguessr.com)**
 
-<img width="2666" height="1520" alt="image" src="https://github.com/user-attachments/assets/61887c99-e848-48f0-8138-f7f73fe43e9d" />
+<!-- GIF of one full round: menu selection → listening → typing guess → answer reveal -->
+![Gameplay](public/opguessr-demo.gif)
 
 Built with [Astro](https://astro.build) · [Alpine.js](https://alpinejs.dev) · [daisyUI](https://daisyui.com) · [Plyr](https://plyr.io)
 
-1. Choose a pool: a difficulty (Top 50 / 100 / 500 / 1000 / 2500 by popularity) or **My MAL List** (openings from your own MyAnimeList list) + optional genre filter.
-2. Listen to the opening theme in audio mode (worth 1000 pts)
-3. Type the anime name — search-as-you-type filters the pool
-4. Optionally unlock the **blurred video** (halves the round to 500 pts permanently)
-5. After 5 rounds, see your score and accuracy
+## Features
 
-## Tech stack
+- 🎵 **Audio-first gameplay** — listen to the opening, type the anime name. Autocomplete filters the pool as you type.
+- 🎬 **Video clue** — unlock a blurred video hint (round drops from 1000 → 500 pts)
+- 📋 **My MAL List** — play openings from your own MyAnimeList profile
+- 🎭 **Genre filter** — narrow the pool by genre across all modes
+- 🎨 **24 themes** — every daisyUI theme, toggleable from the top-right corner
+- 📂 **Anime Directory** — browse all ~1900+ openings with search, filters, and detail pages
+
+## Tech Stack
 
 | Layer | Choice |
 |---|---|
 | Framework | [Astro](https://astro.build) 7 |
-| UI logic | [AlpineJS](https://alpinejs.dev) 3 |
+| UI logic | [Alpine.js](https://alpinejs.dev) 3 |
 | Styles | [Tailwind CSS](https://tailwindcss.com) 4 + [daisyUI](https://daisyui.com) 5 |
-| Media | [Plyr](https://plyr.io) with `--plyr-color-main` bound to daisyUI's `--color-primary` |
-| Data | Tenrai API (popularity-ranked anime list) + AnimeThemes API (opening audio/video links) + AniListAPI (covers) + MyAnimeList API v2 (user lists, via Netlify function) |
+| Media | [Plyr](https://plyr.io) |
+| Icons | [Phosphor Icons](https://phosphoricons.com) |
+| Font | [Geist Pixel](https://fontsource.org/fonts/geist-pixel) |
+| Data | Tenrai API · AnimeThemes API · AniList API · MyAnimeList API v2 |
 
-## Project structure
-
-```
-src/
-├── components/          # Astro UI components
-│   ├── AnswerCard.astro
-│   ├── GameNavbar.astro
-│   ├── MediaPlayer.astro
-│   ├── MenuScreen.astro
-│   ├── ModeToggle.astro
-│   ├── ResultScreen.astro
-│   └── SearchInput.astro
-├── data/
-│   └── fetch-openings.mjs   # Build script: Tenrai → AnimeThemes pipeline
-├── layouts/
-│   └── Layout.astro         # Base layout + theme selector
-├── pages/
-│   └── index.astro          # Entry point, components + Alpine data definition
-├── scripts/
-│   ├── game.js              # Alpine game component (Plyr, state, game logic)
-│   └── mal-pool.js          # My MAL List mode: list fetch + AnimeThemes resolver + cache
-└── styles/
-    └── global.css           # Tailwind + daisyUI + Pixelify Sans font
-netlify/
-└── functions/
-    └── animelist.mjs        # MAL API v2 proxy (keeps MAL_CLIENT_ID server-side)
-```
-
-## Development
+## Getting Started
 
 ```bash
-# Install dependencies
 pnpm install
-
-# Start dev server (background mode recommended)
 astro dev --background
-
-# Check logs if needed
-astro dev logs
-astro dev status
-astro dev stop
 ```
 
-The dev server runs at `http://localhost:4321`.
+Dev server runs at `http://localhost:4321`.
 
 ## Build
 
 ```bash
-pnpm build       # Prebuild fetches opening data, then Astro builds to dist/
-pnpm preview     # Preview the production build locally
+pnpm build
+pnpm preview
 ```
 
-The `prebuild` step (`node src/data/fetch-openings.mjs`) paginates through the Tenrai API (2500 most popular anime), derives AnimeThemes slugs from titles, fetches opening audio/video links, and writes `public/data/openings.json`. Entries without a matching AnimeThemes opening are silently skipped (~1020 of 2500).
+The `prebuild` step fetches ~1000 anime with usable openings from the Tenrai and AnimeThemes APIs and writes `public/data/openings.json`.
 
-## My MAL List mode
+## My MAL List Mode
 
-Instead of the popularity-ranked pool, players can enter a MyAnimeList username to play openings from anime on that user's list (completed / watching / on-hold / dropped — plan-to-watch is excluded).
+Enter a MyAnimeList username to play openings from that user's list (completed / watching / on-hold / dropped). Requires a `MAL_CLIENT_ID` env var — see `.env.example`. The Netlify function keeps it server-side.
 
-- `netlify/functions/animelist.mjs` proxies the [MAL API v2](https://myanimelist.net/apiconfig) user animelist endpoint. Public lists only need a Client ID (no OAuth); the function keeps it server-side via the `MAL_CLIENT_ID` env var (see `.env.example`).
-- `src/scripts/mal-pool.js` fetches the list, resolves openings at runtime via the AnimeThemes GraphQL API (batched, same query as the build script), and caches the pool in `localStorage` for 24h.
-- Genre filtering works in this mode too (genres come from the MAL API).
+To test locally, use `netlify dev` instead of `astro dev`.
 
-To run this mode locally, use `netlify dev` (wraps `astro dev`) so the function is served alongside the site.
+## Contributing
 
-## Game mechanics
+PRs welcome. Please open an issue first for larger changes.
 
-- **5 rounds** per game
-- **Audio mode**: full 1000 pts per correct guess
-- **Video unlock**: one-way, halves the round to 500 pts
-- **Video range**: locked to 25s–65s via native `currentTime` setter override; pressing play after 65s restarts at 25s
-- **Answer validation**: search across all alternative titles (`titles` array), invalid guesses blocked with red input highlight
-- **High score**: persisted in `localStorage`
-- **32 daisyUI themes**: toggle via the paintbrush icon in the top-right corner
+## License
+
+This project is licensed under the [Business Source License 1.1](LICENSE).
+Viewing and contributing via PRs is encouraged. Redistribution or hosting your own copy is not permitted.
