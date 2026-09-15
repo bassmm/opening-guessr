@@ -6,7 +6,7 @@ Built with [Astro](https://astro.build), [AlpineJS](https://alpinejs.dev), [dais
 
 <img width="2666" height="1520" alt="image" src="https://github.com/user-attachments/assets/61887c99-e848-48f0-8138-f7f73fe43e9d" />
 
-## How it works
+Built with [Astro](https://astro.build) · [Alpine.js](https://alpinejs.dev) · [daisyUI](https://daisyui.com) · [Plyr](https://plyr.io)
 
 1. Choose a pool: a difficulty (Top 50 / 100 / 500 / 1000 / 2500 by popularity) or **My MAL List** (openings from your own MyAnimeList list) + optional genre filter.
 2. Listen to the opening theme in audio mode (worth 1000 pts)
