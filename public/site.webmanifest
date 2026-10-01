@@ -1,21 +1,21 @@
 {
-  "name": "Opening Guessr",
-  "short_name": "OpGuessr",
+  "name": "MyWebSite",
+  "short_name": "MySite",
   "icons": [
     {
-      "src": "/web-app-manifest-192x192.png?v=20260819",
+      "src": "/web-app-manifest-192x192.png?v=20261001",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/web-app-manifest-512x512.png?v=20260819",
+      "src": "/web-app-manifest-512x512.png?v=20261001",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
+  "theme_color": "#2c2c38",
+  "background_color": "#2c2c38",
   "display": "standalone"
 }

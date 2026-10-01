@@ -37,18 +37,18 @@ const ogImageUrl = ogImage ?? new URL("/opengraph.png", Astro.site).href;
         <link
             rel="icon"
             type="image/png"
-            href="/favicon-96x96.png?v=20260819"
+            href="/favicon-96x96.png?v=20261001"
             sizes="96x96"
         />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260819" />
-        <link rel="shortcut icon" href="/favicon.ico?v=20260819" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20261001" />
+        <link rel="shortcut icon" href="/favicon.ico?v=20261001" />
         <link
             rel="apple-touch-icon"
             sizes="180x180"
-            href="/apple-touch-icon.png?v=20260819"
+            href="/apple-touch-icon.png?v=20261001"
         />
         <meta name="apple-mobile-web-app-title" content="OpGuessr" />
-        <link rel="manifest" href="/site.webmanifest?v=20260819" />
+        <link rel="manifest" href="/site.webmanifest?v=20261001" />
         <SEO
             title={title}
             description={description}
@@ -101,12 +101,13 @@ const ogImageUrl = ogImage ?? new URL("/opengraph.png", Astro.site).href;
             defer
             src="https://cloud.umami.is/script.js"
             data-website-id="18246006-a86a-4aae-aa82-d2bf24d8e501"
-            ></script>
+        ></script>
         <script
             async
             src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4299046309223342"
             crossorigin="anonymous"
-            defer></script>
+            defer
+        ></script>
     </head>
     <body class="relative min-h-screen bg-base-200 text-base-content">
         <div
@@ -149,7 +150,8 @@ const ogImageUrl = ogImage ?? new URL("/opengraph.png", Astro.site).href;
                         <button
                             class="justify-start text-left"
                             @click="$store.theme.set(theme); open = false"
-                            x-text="theme"></button>
+                            x-text="theme"
+                        ></button>
                     </li>
                 </template>
             </ul>
@@ -157,42 +159,44 @@ const ogImageUrl = ogImage ?? new URL("/opengraph.png", Astro.site).href;
 
         <slot />
 
-        <footer
-            class="footer footer-horizontal footer-center bg-base-200 text-base-content rounded relative overflow-hidden p-10"
-        >
+        <footer class="footer footer-horizontal footer-center bg-base-200 text-base-content rounded relative overflow-hidden p-10">
             <div
                 class="pointer-events-none select-none absolute inset-x-0 bottom-0 z-0 flex justify-center translate-y-5"
                 aria-hidden="true"
             >
-                <div
-                    class="relative [-webkit-mask-image:linear-gradient(to_bottom,black_25%,transparent_80%)] [mask-image:linear-gradient(to_bottom,black_25%,transparent_80%)]"
-                >
-                    <span
-                        class="font-bold text-shadow-primary text-shadow-sm text-shadow whitespace-nowrap leading-none text-[12vw] opacity-20 block"
-                    >
+                <div class="relative [-webkit-mask-image:linear-gradient(to_bottom,black_25%,transparent_80%)] [mask-image:linear-gradient(to_bottom,black_25%,transparent_80%)]">
+                    <span class="font-bold text-shadow-primary text-shadow-sm text-shadow whitespace-nowrap leading-none text-[12vw] opacity-20 block">
                         Opening Guessr
                     </span>
-                    <span
-                        class="absolute inset-0 font-bold text-shadow-primary text-shadow-sm text-shadow whitespace-nowrap leading-none text-[12vw] opacity-20 block blur-3xl mask-[linear-gradient(to_bottom,transparent_45%,black_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_45%,black_100%)]"
-                    >
+                    <span class="absolute inset-0 font-bold text-shadow-primary text-shadow-sm text-shadow whitespace-nowrap leading-none text-[12vw] opacity-20 block blur-3xl mask-[linear-gradient(to_bottom,transparent_45%,black_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_45%,black_100%)]">
                         Opening Guessr
                     </span>
                 </div>
             </div>
             <nav class="flex flex-wrap justify-center gap-x-4 gap-y-2 relative z-10">
-                <a href="/about" class="link link-hover">About</a>
-                <a href="/faq" class="link link-hover">FAQ</a>
-                <a href="/privacy" class="link link-hover">Privacy</a>
+                <a href="/about" class="link link-hover">
+                    About
+                </a>
+                <a href="/faq" class="link link-hover">
+                    FAQ
+                </a>
+                <a href="/privacy" class="link link-hover">
+                    Privacy
+                </a>
                 <a
                     href="mailto:bassmmm@proton.me"
                     target="_blank"
-                    class="link link-hover">Say Hi!</a
+                    class="link link-hover"
                 >
+                    Say Hi!
+                </a>
                 <a
                     href="https://www.buymeacoffee.com/bassmm"
                     target="_blank"
-                    class="link link-hover">Support Me :)</a
+                    class="link link-hover"
                 >
+                    Support Me :)
+                </a>
             </nav>
             <nav class="relative z-10">
                 <div class="grid grid-flow-col gap-4">
@@ -221,8 +225,7 @@ const ogImageUrl = ogImage ?? new URL("/opengraph.png", Astro.site).href;
             </nav>
             <aside class="relative z-10">
                 <p>
-                    ©
-                    <a href="https://bassmm.dev"> bassmm.dev</a>
+                    ©<a href="https://bassmm.dev"> bassmm.dev</a>
                 </p>
             </aside>
         </footer>
